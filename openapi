@@ -401,6 +401,135 @@ paths:
         '500':
           description: Ошибка базы данных
 
+  /nko/{nkoId}/favorite:
+    post:
+      tags: [НКО (Некоммерческие организации)]
+      summary: Добавить НКО в избранное
+      description: Добавление НКО в список избранных для текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: nkoId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID НКО для добавления в избранное
+      responses:
+        '200':
+          description: НКО успешно добавлено в избранное
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "НКО с ID 1 добавлено в избранное"
+        '400':
+          description: НКО уже в избранном
+        '404':
+          description: НКО не найдено
+        '401':
+          description: Пользователь не авторизован
+        '500':
+          description: Ошибка базы данных
+    delete:
+      tags: [НКО (Некоммерческие организации)]
+      summary: Удалить НКО из избранного
+      description: Удаление НКО из списка избранных для текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: nkoId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID НКО для удаления из избранного
+      responses:
+        '200':
+          description: НКО успешно удалено из избранного
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "НКО с ID 1 удалено из избранного"
+        '404':
+          description: НКО не найдено в избранном
+        '401':
+          description: Пользователь не авторизован
+        '500':
+          description: Ошибка базы данных
+
+  /event/{eventId}/favorite:
+    post:
+      tags: [События (Календарь)]
+      summary: Добавить мероприятие в избранное
+      description: Добавление мероприятия в список избранных для текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID мероприятия для добавления в избранное
+      responses:
+        '200':
+          description: Мероприятие успешно добавлено в избранное
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Мероприятие с ID 1 добавлено в избранное"
+        '400':
+          description: Мероприятие уже в избранном
+        '404':
+          description: Мероприятие не найдено
+        '401':
+          description: Пользователь не авторизован
+        '500':
+          description: Ошибка базы данных
+    delete:
+      tags: [События (Календарь)]
+      summary: Удалить мероприятие из избранного
+      description: Удаление мероприятия из списка избранных для текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID мероприятия для удаления из избранного
+      responses:
+        '200':
+          description: Мероприятие успешно удалено из избранного
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Мероприятие с ID 1 удалено из избранного"
+        '404':
+          description: Мероприятие не найдено в избранном
+        '401':
+          description: Пользователь не авторизован
+        '500':
+          description: Ошибка базы данных
+
+
   /news:
     get:
       tags: [Публичные данные]
