@@ -61,7 +61,7 @@ services:
       - DEBUG=False
       - HOST=0.0.0.0
       - PORT=8000
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ne.realnotema.ru:5432/${POSTGRES_DB}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pg-cora:5432/${POSTGRES_DB}
       - MINIO_ENDPOINT=minio-cora:9000
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
