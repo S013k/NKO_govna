@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
-from config import settings
-from s3 import router as s3_router
+from .config import settings
+from .s3 import router as s3_router
 from . import auth
 app = FastAPI(
     title="НКО Добрые дела Росатома API",
