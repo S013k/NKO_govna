@@ -92,7 +92,7 @@ def get_nko(
     jwt_token: str,
     city: Optional[str] = None,
     favorite: Optional[bool] = None,
-    category: Optional[List[str]] = None,
+    category: Optional[List[str]] = Query(None),
     regex: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
@@ -103,12 +103,15 @@ def get_nko(
         jwt_token: JWT токен пользователя
         city: Фильтр по городу (опционально)
         favorite: Фильтр по избранным (опционально)
-        category: Фильтр по категориям (опционально)
+        category: Фильтр по категориям (опционально, можно передать несколько раз)
         regex: Регулярное выражение для поиска (опционально)
         db: Сессия базы данных
 
     Returns:
         Список НКО с их категориями
+    
+    Example:
+        GET /nko?jwt_token=test&category=Помощь детям&category=Образование
     """
     filters = NKOFilterRequest(
         jwt_token=jwt_token,
