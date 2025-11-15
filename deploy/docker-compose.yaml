@@ -51,9 +51,10 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile.backend
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - HOSTNAME=0.0.0.0
+      - APP_NAME=НКО Добрые дела Росатома API
+      - DEBUG=False
+      - HOST=0.0.0.0
+      - PORT=8000
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
