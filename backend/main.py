@@ -2,10 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
-
 from config import settings
 from s3 import router as s3_router
-
+from . import auth
 app = FastAPI(
     title="НКО Добрые дела Росатома API",
     description="Backend API для портала Добрые дела Росатома",
@@ -23,7 +22,7 @@ app.add_middleware(
 
 # Подключаем S3 роутеры
 app.include_router(s3_router, prefix="/s3", tags=["S3 Storage"])
-
+app.include_router(auth.router)
 
 class PingResponse(BaseModel):
     status: str
