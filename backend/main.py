@@ -14,7 +14,7 @@ from auth import (
 )
 from config import settings
 from database import close_db, get_db, init_db
-from nko import NKOFilterRequest, NKOResponse, fetch_nko, fetch_nko_by_id
+from nko import NKOFilterRequest, NKOCreateRequest, NKOResponse, fetch_nko, fetch_nko_by_id, create_nko
 from city import CityCreateRequest, CityResponse, create_city, delete_city, fetch_cities, fetch_city_by_id
 from s3 import router as s3_router
 
@@ -159,6 +159,21 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Вход пользователя и получение токена"""
     return login_for_access_token(form_data, db)
+
+
+@app.post("/nko/add", response_model=NKOResponse, status_code=status.HTTP_201_CREATED)
+def add_nko(nko_data: NKOCreateRequest, db: Session = Depends(get_db)):
+    """
+    Создание нового НКО
+
+    Args:
+        nko_data: Данные для создания НКО (name, description, logo, address, city, coordinates, meta, categories)
+        db: Сессия базы данных
+
+    Returns:
+        Созданное НКО с категориями
+    """
+    return create_nko(nko_data, db)
 
 
 @app.get("/users/me/", response_model=User, tags=["Users"])
