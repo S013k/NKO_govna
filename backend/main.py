@@ -35,7 +35,7 @@ async def root():
     }
 
 
-@app.get("/api/ping", response_model=PingResponse)
+@app.get("/ping", response_model=PingResponse)
 async def ping():
     """Проверка работоспособности API"""
     return PingResponse(
