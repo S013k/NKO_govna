@@ -258,16 +258,69 @@ paths:
         '500':
           description: Ошибка базы данных
 
-  /events:
+  /event:
     get:
       tags: [Публичные данные]
-      summary: Получить список одобренных событий
+      summary: Получить список событий с фильтрацией
+      description: Фильтрация по НКО, категориям, временному диапазону, избранному и regex поиску
       parameters:
-        - name: city_id
+        - name: jwt_token
           in: query
+          required: true
           schema:
-            type: integer
-          description: ID города для фильтрации
+            type: string
+          description: JWT токен пользователя
+        - name: nko_id
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+          style: form
+          explode: true
+          description: Список ID НКО для фильтрации (можно передать несколько раз)
+          example: [1, 2]
+        - name: favorite
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Фильтр по избранным событиям (заглушка)
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          description: Список категорий для фильтрации (можно передать несколько раз)
+          example: ["Спорт", "Культура"]
+        - name: regex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Регулярное выражение для поиска в названии и описании
+          example: "концерт"
+        - name: time_from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Фильтр по времени начала события (ISO format)
+          example: "2024-01-01T00:00:00"
+        - name: time_to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Фильтр по времени окончания события (ISO format)
+          example: "2024-12-31T23:59:59"
       responses:
         '200':
           description: Список событий
@@ -276,7 +329,77 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Event'
+                  $ref: '#/components/schemas/EventResponse'
+        '500':
+          description: Ошибка базы данных
+    post:
+      tags: [События (Календарь)]
+      summary: Создать новое событие
+      description: Создание нового события с проверкой существования НКО и категорий
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreateRequest'
+      responses:
+        '201':
+          description: Событие успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          description: НКО или категория не найдены
+        '500':
+          description: Ошибка базы данных
+
+  /event/{eventId}:
+    get:
+      tags: [Публичные данные]
+      summary: Получить детальную информацию о событии по ID
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Детальная информация о событии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          description: Событие не найдено
+        '500':
+          description: Ошибка базы данных
+    delete:
+      tags: [События (Календарь)]
+      summary: Удалить событие по ID
+      description: Удаление события и всех связанных с ним данных (категории)
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Событие успешно удалено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Событие с ID 1 успешно удалено"
+        '404':
+          description: Событие не найдено
+        '500':
+          description: Ошибка базы данных
 
   /news:
     get:
@@ -633,6 +756,218 @@ components:
           type: integer
         address:
           type: string
+    EventFilterRequest:
+      type: object
+      required:
+        - jwt_token
+      properties:
+        jwt_token:
+          type: string
+          description: JWT токен пользователя
+        nko_id:
+          type: array
+          items:
+            type: integer
+          nullable: true
+          description: Список ID НКО для фильтрации
+          example: [1, 2]
+        favorite:
+          type: boolean
+          nullable: true
+          description: Фильтр по избранным событиям (заглушка)
+        category:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Список категорий для фильтрации
+          example: ["Спорт", "Культура"]
+        regex:
+          type: string
+          nullable: true
+          description: Регулярное выражение для поиска в названии и описании
+          example: "концерт"
+        time_from:
+          type: string
+          format: date-time
+          nullable: true
+          description: Фильтр по времени начала события
+          example: "2024-01-01T00:00:00"
+        time_to:
+          type: string
+          format: date-time
+          nullable: true
+          description: Фильтр по времени окончания события
+          example: "2024-12-31T23:59:59"
+
+    EventCreateRequest:
+      type: object
+      required:
+        - nko_id
+        - name
+        - created_by
+        - state
+        - categories
+      properties:
+        nko_id:
+          type: integer
+          description: ID НКО-организатора
+          example: 1
+        name:
+          type: string
+          description: Название события
+          example: "Благотворительный концерт"
+        description:
+          type: string
+          nullable: true
+          description: Описание события
+          example: "Концерт в поддержку детей"
+        address:
+          type: string
+          nullable: true
+          description: Адрес проведения события
+          example: "г. Москва, ул. Тверская, д. 1"
+        picture:
+          type: string
+          nullable: true
+          description: URL изображения события
+          example: "https://example.com/event.jpg"
+        latitude:
+          type: number
+          format: float
+          nullable: true
+          description: Широта координат
+          example: 55.7558
+        longitude:
+          type: number
+          format: float
+          nullable: true
+          description: Долгота координат
+          example: 37.6173
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Время начала события
+          example: "2024-12-01T10:00:00"
+        finish_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Время окончания события
+          example: "2024-12-01T18:00:00"
+        created_by:
+          type: integer
+          description: ID пользователя-создателя
+          example: 1
+        state:
+          type: string
+          description: Статус события
+          enum: [draft, approved, rejected, review]
+          example: "draft"
+        meta:
+          type: string
+          nullable: true
+          description: Дополнительные метаданные
+          example: "{}"
+        categories:
+          type: array
+          items:
+            type: string
+          description: Список названий категорий события
+          example: ["Спорт", "Культура"]
+
+    EventResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID события
+          example: 1
+        nko_id:
+          type: integer
+          description: ID НКО-организатора
+          example: 1
+        nko_name:
+          type: string
+          nullable: true
+          description: Название НКО-организатора
+          example: "Благотворительный фонд"
+        name:
+          type: string
+          description: Название события
+          example: "Благотворительный концерт"
+        description:
+          type: string
+          nullable: true
+          description: Описание события
+          example: "Концерт в поддержку детей"
+        address:
+          type: string
+          nullable: true
+          description: Адрес проведения события
+          example: "г. Москва, ул. Тверская, д. 1"
+        picture:
+          type: string
+          nullable: true
+          description: URL изображения события
+          example: "https://example.com/event.jpg"
+        latitude:
+          type: number
+          format: float
+          nullable: true
+          description: Широта координат
+          example: 55.7558
+        longitude:
+          type: number
+          format: float
+          nullable: true
+          description: Долгота координат
+          example: 37.6173
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Время начала события
+          example: "2024-12-01T10:00:00+03:00"
+        finish_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Время окончания события
+          example: "2024-12-01T18:00:00+03:00"
+        created_by:
+          type: integer
+          description: ID пользователя-создателя
+          example: 1
+        approved_by:
+          type: integer
+          nullable: true
+          description: ID модератора, одобрившего событие
+          example: 2
+        state:
+          type: string
+          description: Статус события
+          enum: [draft, approved, rejected, review]
+          example: "approved"
+        meta:
+          type: string
+          nullable: true
+          description: Дополнительные метаданные
+          example: "{}"
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Дата создания записи
+          example: "2024-01-20T12:00:00+03:00"
+        categories:
+          type: array
+          items:
+            type: string
+          description: Список категорий события
+          example: ["Спорт", "Культура"]
+
 
     News:
       type: object

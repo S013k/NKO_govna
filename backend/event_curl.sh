@@ -1,41 +1,59 @@
 #!/bin/bash
 
-BASE_URL="http://localhost:8000"
+# Получение всех событий
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token"
 
-# 1. Получение всех событий
-curl -X GET "${BASE_URL}/event?jwt_token=test" \
-  -H "Content-Type: application/json" | jq '.'
+# Получение событий с фильтром по одному НКО
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "nko_id=1"
 
-# 2. Получение событий с фильтром по НКО
-curl -X GET "${BASE_URL}/event?jwt_token=test&nko_id=1" \
-  -H "Content-Type: application/json" | jq '.'
+# Получение событий с фильтром по нескольким НКО
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "nko_id=1" \
+  --data-urlencode "nko_id=2"
 
-# 3. Получение событий с фильтром по нескольким НКО
-curl -X GET "${BASE_URL}/event?jwt_token=test&nko_id=1&nko_id=2" \
-  -H "Content-Type: application/json" | jq '.'
+# Получение событий с фильтром по категории
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "category=Спорт"
 
-# 4. Получение событий с фильтром по категории
-curl -X GET "${BASE_URL}/event?jwt_token=test&category=Спорт" \
-  -H "Content-Type: application/json" | jq '.'
+# Получение событий с фильтром по нескольким категориям
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "category=Спорт" \
+  --data-urlencode "category=Культура"
 
-# 5. Получение событий с фильтром по временному диапазону
-curl -X GET "${BASE_URL}/event?jwt_token=test&time_from=2024-01-01T00:00:00&time_to=2024-12-31T23:59:59" \
-  -H "Content-Type: application/json" | jq '.'
+# Получение событий с фильтром по временному диапазону
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "time_from=2024-01-01T00:00:00" \
+  --data-urlencode "time_to=2024-12-31T23:59:59"
 
-# 6. Получение событий с regex поиском
-curl -X GET "${BASE_URL}/event?jwt_token=test&regex=концерт" \
-  -H "Content-Type: application/json" | jq '.'
+# Получение событий с regex поиском
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "regex=концерт"
 
-# 7. Получение событий с фильтром по избранным (заглушка)
-curl -X GET "${BASE_URL}/event?jwt_token=test&favorite=true" \
-  -H "Content-Type: application/json" | jq '.'
+# Получение событий с фильтром по избранным (заглушка)
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "favorite=true"
 
-# 8. Получение события по ID
-curl -X GET "${BASE_URL}/event/1" \
-  -H "Content-Type: application/json" | jq '.'
+# Комбинированный фильтр: НКО + категория + время
+curl -G "http://localhost/api/event" \
+  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "nko_id=1" \
+  --data-urlencode "category=Спорт" \
+  --data-urlencode "time_from=2024-06-01T00:00:00"
 
-# 9. Создание нового события
-curl -X POST "${BASE_URL}/event" \
+# Получение события по ID
+curl -X GET http://localhost/api/event/1
+
+# Создание нового события
+curl -X POST http://localhost/api/event \
   -H "Content-Type: application/json" \
   -d '{
     "nko_id": 1,
@@ -51,8 +69,7 @@ curl -X POST "${BASE_URL}/event" \
     "state": "draft",
     "meta": "{}",
     "categories": ["Спорт", "Культура"]
-  }' | jq '.'
+  }'
 
-# 10. Удаление события (раскомментируйте для использования)
-# curl -X DELETE "${BASE_URL}/event/999" \
-#   -H "Content-Type: application/json" | jq '.'
+# Удаление события по ID
+curl -X DELETE http://localhost/api/event/1
