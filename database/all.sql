@@ -1,3 +1,17 @@
+DO
+$$
+DECLARE
+    r RECORD;
+BEGIN
+    -- Перебираем все таблицы в схеме public
+    FOR r IN
+        SELECT tablename FROM pg_tables WHERE schemaname = 'public'
+    LOOP
+        EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END
+$$;
+
 -- Категории НКО
 CREATE TABLE IF NOT EXISTS nko_categories (
     id SMALLSERIAL PRIMARY KEY,
@@ -5,16 +19,24 @@ CREATE TABLE IF NOT EXISTS nko_categories (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 
+CREATE TABLE IF NOT EXISTS cities (
+    id SMALLSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
 -- Организации (НКО)
 CREATE TABLE IF NOT EXISTS nko (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    url TEXT,
     logo TEXT,
     address TEXT NOT NULL,
+    city_id SMALLINT NOT NULL,
     coords POINT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT now()
+    meta JSONB,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    FOREIGN KEY (city_id) REFERENCES cities(id)
 );
 
 -- Связующая таблица для НКО и их категорий
