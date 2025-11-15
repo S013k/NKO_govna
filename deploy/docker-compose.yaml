@@ -46,6 +46,27 @@ services:
     networks:
       - cora-network
 
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=НКО Добрые дела Росатома API
+      - DEBUG=False
+      - HOST=0.0.0.0
+      - PORT=8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - cora-network
+
   quokka:
     build:
       context: ..
@@ -63,6 +84,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - cora-network
 
 networks:
   cora-network:
