@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS nko_categories_link (
 );
 
 -- Перечисление для ролей пользователей
--- CREATE TYPE users_roles AS ENUM ('nko', 'admin', 'moder', 'user');
+DROP TYPE IF EXISTS users_roles;
+CREATE TYPE users_roles AS ENUM ('nko', 'admin', 'moder', 'user');
 
 -- Пользователи
 CREATE TABLE IF NOT EXISTS users (
@@ -78,7 +79,8 @@ CREATE TABLE IF NOT EXISTS events_categories (
 );
 
 -- Перечисление для состояний мероприятий
--- CREATE TYPE events_states AS ENUM ('draft', 'approved', 'rejected', 'review');
+DROP TYPE IF EXISTS events_states;
+CREATE TYPE events_states AS ENUM ('draft', 'approved', 'rejected', 'review');
 
 -- Мероприятия
 CREATE TABLE IF NOT EXISTS events (

@@ -1,13 +1,17 @@
-from fastapi import FastAPI, Depends
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import List
+
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from datetime import datetime
-from contextlib import asynccontextmanager
-from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db import init_db, close_db, get_db
-from nko import fetch_nko, NKOFilterRequest, NKOResponse
+import auth
+from config import settings
+from db import close_db, get_db, init_db
+from nko import NKOFilterRequest, NKOResponse, fetch_nko
+from s3 import router as s3_router
 
 
 @asynccontextmanager
@@ -20,14 +24,11 @@ async def lifespan(app: FastAPI):
     await close_db()
 
 
-from config import settings
-from s3 import router as s3_router
-
 app = FastAPI(
     title="НКО Добрые дела Росатома API",
     description="Backend API для портала Добрые дела Росатома",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS настройки
@@ -41,6 +42,7 @@ app.add_middleware(
 
 # Подключаем S3 роутеры
 app.include_router(s3_router, prefix="/s3", tags=["S3 Storage"])
+app.include_router(auth.router)
 
 
 class PingResponse(BaseModel):
@@ -55,7 +57,7 @@ async def root():
     return {
         "message": "НКО Добрые дела Росатома API",
         "version": "1.0.0",
-        "docs": "/docs"
+        "docs": "/docs",
     }
 
 
@@ -63,30 +65,25 @@ async def root():
 async def ping():
     """Проверка работоспособности API"""
     return PingResponse(
-        status="ok",
-        message="pong",
-        timestamp=datetime.utcnow().isoformat()
+        status="ok", message="pong", timestamp=datetime.utcnow().isoformat()
     )
 
 
 @app.get("/health")
 async def health_check():
     """Health check эндпоинт для мониторинга"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 
 @app.post("/nko", response_model=List[NKOResponse])
 async def get_nko(filters: NKOFilterRequest, db: AsyncSession = Depends(get_db)):
     """
     Получение списка НКО с фильтрацией
-    
+
     Args:
         filters: Параметры фильтрации (jwt_token, city, favorite, category, regex)
         db: Сессия базы данных
-        
+
     Returns:
         Список НКО с их категориями
     """
@@ -95,4 +92,5 @@ async def get_nko(filters: NKOFilterRequest, db: AsyncSession = Depends(get_db))
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
