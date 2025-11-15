@@ -43,6 +43,12 @@ services:
     volumes:
       - ./data/minio:/data
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     networks:
       - cora-network
 
@@ -60,8 +66,16 @@ services:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
       - MINIO_SECURE=${MINIO_SECURE}
+      - POSTGRES_HOST=pg-cora
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
-      - minio-cora
+      pg-cora:
+        condition: service_healthy
+      minio-cora:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -80,8 +94,15 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOSTNAME=0.0.0.0
+<<<<<<< HEAD
     ports:
       - "3000:3000"
+=======
+      - NEXT_PUBLIC_API_URL=http://cora:8000
+    depends_on:
+      cora:
+        condition: service_healthy
+>>>>>>> a362388 (depends_on)
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
