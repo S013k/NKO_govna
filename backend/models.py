@@ -3,10 +3,11 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy import Column, Integer, String, Text, SmallInteger, BigInteger, ForeignKey
+from sqlalchemy.dialects.postgresql import ENUM, JSONB, POINT
+from sqlalchemy.types import TIMESTAMP
 
-from .database import Base
+from database import Base
 
 
 class UsersRoles(str, Enum):
@@ -23,13 +24,6 @@ class EventsStates(str, Enum):
     review = "review"
 
 
-class UserCreate(BaseModel):
-    full_name: str
-    login: str
-    password: str
-    role: UsersRoles
-
-
 class UserInDB(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -41,66 +35,71 @@ class UserInDB(Base):
         ENUM(UsersRoles, name="users_roles", create_type=False), nullable=False
     )
 
-
-class User(BaseModel):
-    id: int
-    full_name: str
-    login: str
-    role: UsersRoles
-
-    model_config = ConfigDict(from_attributes=True)
+class NKOCategoryInDB(Base):
+    __tablename__ = "nko_categories"
+    id = Column(SmallInteger, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, unique=True)
+    created_at = Column(TIMESTAMP(timezone=True), server_default="now()")
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+class CityInDB(Base):
+    __tablename__ = "cities"
+    id = Column(SmallInteger, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, unique=True)
 
 
-class TokenData(BaseModel):
-    login: Optional[str] = None
+class NKOInDB(Base):
+    __tablename__ = "nko"
+    id = Column(BigInteger, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    logo = Column(Text)
+    address = Column(Text, nullable=False)
+    city_id = Column(SmallInteger, ForeignKey("cities.id"), nullable=False)
+    coords = Column(POINT, nullable=False)
+    meta = Column(JSONB)
+    created_at = Column(TIMESTAMP(timezone=True), server_default="now()")
 
 
-class NKOCategory(BaseModel):
-    id: int
-    name: str
-    created_at: datetime
+class NKOCategoriesLinkInDB(Base):
+    __tablename__ = "nko_categories_link"
+    nko_id = Column(BigInteger, ForeignKey("nko.id", ondelete="CASCADE"), primary_key=True)
+    category_id = Column(SmallInteger, ForeignKey("nko_categories.id", ondelete="RESTRICT"), primary_key=True)
 
 
-class City(BaseModel):
-    id: int
-    name: str
+class NKOUsersLinkInDB(Base):
+    __tablename__ = "nko_users_link"
+    nko_id = Column(BigInteger, ForeignKey("nko.id", ondelete="CASCADE"), primary_key=True)
+    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
 
 
-class NKO(BaseModel):
-    id: int
-    name: str
-    description: Optional[str] = None
-    logo: Optional[str] = None
-    address: str
-    city_id: int
-    coords: Tuple[float, float]
-    meta: Optional[Dict[str, Any]] = None
-    created_at: datetime
+class EventsCategoryInDB(Base):
+    __tablename__ = "events_categories"
+    id = Column(SmallInteger, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(String(255), nullable=False, unique=True)
 
 
-class EventCategory(BaseModel):
-    id: int
-    name: str
-    description: str
+class EventInDB(Base):
+    __tablename__ = "events"
+    id = Column(BigInteger, primary_key=True, index=True)
+    nko_id = Column(BigInteger, ForeignKey("nko.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    address = Column(Text)
+    picture = Column(Text)
+    coords = Column(POINT)
+    starts_at = Column(TIMESTAMP(timezone=True))
+    finish_at = Column(TIMESTAMP(timezone=True))
+    created_by = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    approved_by = Column(BigInteger, ForeignKey("users.id"))
+    state = Column(ENUM(EventsStates, name="events_states", create_type=False), nullable=False)
+    meta = Column(Text)
+    created_at = Column(TIMESTAMP(timezone=True), server_default="now()")
 
 
-class Event(BaseModel):
-    id: int
-    nko_id: int
-    name: str
-    description: Optional[str] = None
-    address: Optional[str] = None
-    picture: Optional[str] = None
-    coords: Optional[Tuple[float, float]] = None
-    starts_at: Optional[datetime] = None
-    finish_at: Optional[datetime] = None
-    created_by: int
-    approved_by: Optional[int] = None
-    state: EventsStates
-    meta: Optional[str] = None
-    created_at: datetime
+class EventsCategoriesLinkInDB(Base):
+    __tablename__ = "events_categories_link"
+    events_id = Column(BigInteger, ForeignKey("events.id", ondelete="CASCADE"), primary_key=True)
+    category_id = Column(SmallInteger, ForeignKey("events_categories.id", ondelete="RESTRICT"), primary_key=True)
+

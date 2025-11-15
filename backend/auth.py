@@ -1,8 +1,39 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
-import models, security
+
+import security
 from database import get_db
+from models import UserInDB, UsersRoles
+
+
+class UserCreate(BaseModel):
+    full_name: str
+    login: str
+    password: str
+    role: UsersRoles
+
+
+class User(BaseModel):
+    id: int
+    full_name: str
+    login: str
+    role: UsersRoles
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    login: Optional[str] = None
 
 router = APIRouter()
 
@@ -10,18 +41,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 def get_user(db: Session, login: str):
-    return db.query(models.UserInDB).filter(models.UserInDB.login == login).first()
+    return db.query(UserInDB).filter(UserInDB.login == login).first()
 
 
-@router.post("/auth/register", response_model=models.User)
-def register_user(user: models.UserCreate, db: Session = Depends(get_db)):
+@router.post("/auth/register", response_model=User)
+def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = get_user(db, login=user.login)
     if db_user:
         raise HTTPException(status_code=400, detail="Login already registered")
 
     hashed_password, salt = security.get_password_hash_and_salt(user.password)
 
-    db_user = models.UserInDB(
+    db_user = UserInDB(
         full_name=user.full_name,
         login=user.login,
         role=user.role,
@@ -34,7 +65,7 @@ def register_user(user: models.UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 
-@router.post("/auth/login", response_model=models.Token)
+@router.post("/auth/login", response_model=Token)
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
@@ -66,7 +97,7 @@ async def get_current_user(
         login: str = payload.get("sub")
         if login is None:
             raise credentials_exception
-        token_data = models.TokenData(login=login)
+        token_data = TokenData(login=login)
     except JWTError:
         raise credentials_exception
     user = get_user(db, login=token_data.login)
@@ -75,6 +106,6 @@ async def get_current_user(
     return user
 
 
-@router.get("/users/me/", response_model=models.User)
-async def read_users_me(current_user: models.User = Depends(get_current_user)):
+@router.get("/users/me/", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
