@@ -36,7 +36,7 @@ export function NKOLogo({
       height={height}
       className={className}
       priority={priority}
-      fallback={fallback || '/images/placeholder.png'}
+      fallback={fallback}
     />
   )
 }
