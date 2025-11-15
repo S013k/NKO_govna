@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import List
+from typing import Dict, List, Optional
 
-from fastapi import Depends, FastAPI, status
+from fastapi import Depends, FastAPI, status, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -15,6 +15,7 @@ from auth import (
 from config import settings
 from database import close_db, get_db, init_db
 from nko import NKOFilterRequest, NKOResponse, fetch_nko
+from city import CityCreateRequest, CityResponse, create_city, delete_city, fetch_cities, fetch_city_by_id
 from s3 import router as s3_router
 
 
@@ -99,6 +100,38 @@ def get_nko(filters: NKOFilterRequest, db: Session = Depends(get_db)):
         Список НКО с их категориями
     """
     return fetch_nko(filters, db)
+
+
+@app.get("/city", response_model=List[CityResponse], tags=["City"])
+def get_cities(regex: Optional[str] = None, db: Session = Depends(get_db)):
+    """
+    Получение списка городов с фильтрацией по regex
+    """
+    return fetch_cities(regex, db)
+
+
+@app.post("/city", response_model=CityResponse, tags=["City"])
+def add_city(city_data: CityCreateRequest, db: Session = Depends(get_db)):
+    """
+    Добавление нового города
+    """
+    return create_city(city_data, db)
+
+
+@app.get("/city/{city_id}", response_model=CityResponse, tags=["City"])
+def get_city_by_id(city_id: int, db: Session = Depends(get_db)):
+    """
+    Получение города по ID
+    """
+    return fetch_city_by_id(city_id, db)
+
+
+@app.delete("/city/{city_id}", response_model=Dict[str, str], tags=["City"])
+def remove_city(city_id: int, db: Session = Depends(get_db)):
+    """
+    Удаление города по ID
+    """
+    return delete_city(city_id, db)
 
 
 # Auth endpoints
