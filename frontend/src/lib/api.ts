@@ -192,3 +192,102 @@ class ApiClient {
 
 export const apiClient = new ApiClient(API_BASE_URL)
 export { ApiError }
+
+// NKO related interfaces
+export interface NKOResponse {
+  id: number
+  name: string
+  description?: string
+  logo?: string
+  address: string
+  city?: string
+  latitude: number
+  longitude: number
+  meta?: { url?: string }
+  created_at?: string
+  categories: string[]
+}
+
+export interface CityResponse {
+  id: number
+  name: string
+}
+
+export interface NKOFilters {
+  city?: string
+  category?: string[]
+  regex?: string
+}
+
+// NKO API methods
+export async function fetchNKO(filters?: NKOFilters): Promise<NKOResponse[]> {
+  const params = new URLSearchParams()
+  
+  // Получаем токен из cookies или используем пустой
+  const token = typeof window !== 'undefined' && window.localStorage
+    ? localStorage.getItem('access_token')
+    : null
+  
+  if (token) {
+    params.append('jwt_token', token)
+  } else {
+    params.append('jwt_token', '') // Пустой токен для неавторизованных пользователей
+  }
+  
+  if (filters?.city) {
+    params.append('city', filters.city)
+  }
+  
+  if (filters?.category && filters.category.length > 0) {
+    filters.category.forEach(cat => params.append('category', cat))
+  }
+  
+  if (filters?.regex) {
+    params.append('regex', filters.regex)
+  }
+  
+  const queryString = params.toString()
+  const endpoint = `/nko${queryString ? `?${queryString}` : ''}`
+  
+  return apiClient.get<NKOResponse[]>(endpoint)
+}
+
+export async function fetchNKOById(id: number): Promise<NKOResponse> {
+  // Добавляем JWT токен как в других функциях
+  const token = typeof window !== 'undefined' && window.localStorage
+    ? localStorage.getItem('access_token')
+    : null
+  
+  const params = new URLSearchParams()
+  if (token) {
+    params.append('jwt_token', token)
+  } else {
+    params.append('jwt_token', '') // Пустой токен для неавторизованных пользователей
+  }
+  
+  const queryString = params.toString()
+  const endpoint = `/nko/${id}${queryString ? `?${queryString}` : ''}`
+  
+  console.log('DEBUG: fetchNKOById - ID:', id, 'Endpoint:', endpoint)
+  
+  return apiClient.get<NKOResponse>(endpoint)
+}
+
+export async function fetchCities(): Promise<CityResponse[]> {
+  // Получаем токен из cookies или используем пустой
+  const token = typeof window !== 'undefined' && window.localStorage
+    ? localStorage.getItem('access_token')
+    : null
+  
+  const params = new URLSearchParams()
+  if (token) {
+    params.append('jwt_token', token)
+  } else {
+    params.append('jwt_token', '') // Пустой токен для неавторизованных пользователей
+  }
+  
+  const queryString = params.toString()
+  const endpoint = `/city${queryString ? `?${queryString}` : ''}`
+  
+  return apiClient.get<CityResponse[]>(endpoint)
+}

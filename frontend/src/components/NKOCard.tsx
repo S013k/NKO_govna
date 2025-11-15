@@ -2,24 +2,24 @@
 
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { MapPin, Phone, Mail, Globe, ExternalLink } from 'lucide-react'
+import { MapPin, Globe, ExternalLink } from 'lucide-react'
 import { NKOLogo } from '@/components/NKOLogo'
 import Link from 'next/link'
-import { NKO } from '@/data/nko'
+import { NKOResponse } from '@/lib/api'
 
 interface NKOCardProps {
-  nko: NKO
+  nko: NKOResponse
 }
 
 export function NKOCard({ nko }: NKOCardProps) {
   return (
     <Card className="bg-white border border-[var(--color-border)] rounded-xl p-6 hover-lift transition-all duration-300 h-full flex flex-col">
       <CardHeader className="p-0 pb-4">
-        <div className="flex items-start justify-between mb-4">
-          <div className="w-16 h-16 bg-[var(--color-bg-secondary)] rounded-lg flex items-center justify-center">
+        <div className="flex items-start mb-4">
+          <div className="w-16 h-16 bg-[var(--color-bg-secondary)] rounded-lg flex items-center justify-center flex-shrink-0">
             {nko.logo ? (
               <NKOLogo
-                logoId={nko.id}
+                logoId={nko.id.toString()}
                 width={64}
                 height={64}
                 className="w-12 h-12 object-contain"
@@ -33,9 +33,20 @@ export function NKOCard({ nko }: NKOCardProps) {
               </div>
             )}
           </div>
-          <span className="px-3 py-1 bg-[rgba(2,94,161,0.1)] text-[var(--color-primary)] rounded-full text-sm font-medium">
-            {nko.category}
-          </span>
+          <div className="flex-1 flex justify-end ml-4">
+            <div className="flex flex-col gap-1 items-end">
+              {nko.categories.slice(0, 2).map((category, index) => (
+                <span key={index} className="px-2 py-1 bg-[rgba(2,94,161,0.1)] text-[var(--color-primary)] rounded-full text-xs font-medium whitespace-nowrap">
+                  {category}
+                </span>
+              ))}
+              {nko.categories.length > 2 && (
+                <span className="px-2 py-1 bg-[rgba(2,94,161,0.1)] text-[var(--color-primary)] rounded-full text-xs font-medium whitespace-nowrap">
+                  ...
+                </span>
+              )}
+            </div>
+          </div>
         </div>
         
         <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-2 line-clamp-2">
@@ -55,16 +66,6 @@ export function NKOCard({ nko }: NKOCardProps) {
           </div>
         )}
         
-        {nko.volunteerFunction && (
-          <div className="mt-4 p-3 bg-[var(--color-bg-secondary)] rounded-lg">
-            <p className="text-xs font-medium text-[var(--color-text-primary)] mb-1">
-              Что могут делать волонтеры:
-            </p>
-            <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2">
-              {nko.volunteerFunction}
-            </p>
-          </div>
-        )}
       </CardContent>
 
       <CardFooter className="p-0 pt-4 flex flex-col gap-2">
@@ -74,40 +75,24 @@ export function NKOCard({ nko }: NKOCardProps) {
           </Button>
         </Link>
         
-        <div className="flex gap-2 w-full">
-          {nko.website && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 btn-secondary"
-              asChild
+        {nko.meta?.url && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full btn-secondary"
+            asChild
+          >
+            <a
+              href={nko.meta.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center"
             >
-              <a
-                href={nko.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center"
-              >
-                <Globe className="h-4 w-4 mr-1" />
-                Сайт
-              </a>
-            </Button>
-          )}
-          
-          {nko.phone && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 btn-secondary"
-              asChild
-            >
-              <a href={`tel:${nko.phone}`} className="flex items-center justify-center">
-                <Phone className="h-4 w-4 mr-1" />
-                Позвонить
-              </a>
-            </Button>
-          )}
-        </div>
+              <Globe className="h-4 w-4 mr-1" />
+              Сайт
+            </a>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   )

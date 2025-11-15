@@ -1,25 +1,99 @@
+'use client'
+
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { MapPin, Phone, Mail, Globe, Users, Calendar, ArrowLeft, Heart, Share2 } from 'lucide-react'
+import { MapPin, Phone, Mail, Globe, Users, Calendar, ArrowLeft, Heart, Share2, Star } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { nkoData } from '@/data/nko'
+import { fetchNKOById, NKOResponse } from '@/lib/api'
 import { notFound } from 'next/navigation'
+import { NKOLogo } from '@/components/NKOLogo'
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
-interface PageProps {
-  params: Promise<{
-    slug: string
-  }>
-}
+export default function NKODetailPage() {
+  const params = useParams()
+  const slug = params.slug as string
+  const { user } = useAuth()
+  
+  const [nko, setNko] = useState<NKOResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
+  
+  console.log('NKODetailPage - slug:', slug)
+  
+  useEffect(() => {
+    const loadNKO = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const id = parseInt(slug)
+        console.log('NKODetailPage - parsed ID:', id)
+        
+        if (isNaN(id)) {
+          throw new Error('Invalid ID')
+        }
+        
+        const nkoData = await fetchNKOById(id)
+        console.log('NKODetailPage - fetched NKO:', nkoData)
+        setNko(nkoData)
+      } catch (err) {
+        console.error('Error fetching NKO:', err)
+        setError('Не удалось загрузить данные организации')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-export default async function NKODetailPage({ params }: PageProps) {
-  const { slug } = await params
-  const nko = nkoData.find(organization => organization.id === slug)
+    if (slug) {
+      loadNKO()
+    }
+  }, [slug])
 
-  if (!nko) {
-    notFound()
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="flex items-center justify-center py-32">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-[var(--color-text-secondary)]">Загрузка организации...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
+
+  if (error || !nko) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="flex items-center justify-center py-32">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-4">
+              Организация не найдена
+            </h2>
+            <p className="text-[var(--color-text-secondary)] mb-6">
+              {error || 'Запрошенная организация не существует'}
+            </p>
+            <Link href="/nko">
+              <Button className="btn-primary">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Вернуться к списку
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
   }
 
   return (
@@ -44,12 +118,12 @@ export default async function NKODetailPage({ params }: PageProps) {
             <div className="flex-shrink-0">
               <div className="w-32 h-32 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                 {nko.logo ? (
-                  <Image 
-                    src={nko.logo} 
-                    alt={nko.name}
+                  <NKOLogo
+                    logoId={nko.id.toString()}
                     width={128}
                     height={128}
                     className="w-24 h-24 object-contain"
+                    alt={nko.name}
                   />
                 ) : (
                   <div className="w-24 h-24 bg-white/20 rounded-xl flex items-center justify-center">
@@ -64,12 +138,16 @@ export default async function NKODetailPage({ params }: PageProps) {
             {/* Информация об организации */}
             <div className="flex-1 text-center lg:text-left">
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-4">
-                <h1 className="text-3xl lg:text-4xl font-bold">
+                <h1 className="text-3xl lg:text-4xl font-bold text-white">
                   {nko.name}
                 </h1>
-                <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
-                  {nko.category}
-                </span>
+                <div className="flex flex-wrap gap-2">
+                  {nko.categories.map((category, index) => (
+                    <span key={index} className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
+                      {category}
+                    </span>
+                  ))}
+                </div>
               </div>
               
               <p className="text-xl text-white/90 mb-6 max-w-3xl">
@@ -82,15 +160,61 @@ export default async function NKODetailPage({ params }: PageProps) {
                   <Users className="h-4 w-4 mr-2" />
                   Стать волонтером
                 </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-[var(--color-primary)]">
-                  <Heart className="h-4 w-4 mr-2" />
-                  Подписаться
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white bg-transparent hover:bg-white hover:text-[var(--color-primary)]"
+                  onClick={() => {
+                    console.log('Button clicked - user:', user)
+                    if (!user) {
+                      console.log('Showing auth modal')
+                      setShowAuthModal(true)
+                    } else {
+                      console.log('Toggling favorite:', !isFavorite)
+                      setIsFavorite(!isFavorite)
+                    }
+                  }}
+                >
+                  <Star className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
+                  {isFavorite ? 'В избранном' : 'В избранное'}
                 </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-[var(--color-primary)]">
+                <Button size="lg" variant="outline" className="border-white text-white bg-transparent hover:bg-white hover:text-[var(--color-primary)]">
                   <Share2 className="h-4 w-4 mr-2" />
                   Поделиться
                 </Button>
               </div>
+
+              {/* Модальное окно авторизации */}
+              {showAuthModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
+                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                      Требуется авторизация
+                    </h3>
+                    <p className="text-[var(--color-text-secondary)] mb-4">
+                      Чтобы добавлять организации в избранное, пожалуйста, войдите в свой аккаунт.
+                    </p>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => setShowAuthModal(false)}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        Отмена
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setShowAuthModal(false)
+                          // Здесь можно добавить логику перехода на страницу входа
+                        }}
+                        className="flex-1 btn-primary"
+                      >
+                        Войти
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -115,72 +239,17 @@ export default async function NKODetailPage({ params }: PageProps) {
                   </div>
                 )}
                 
-                {nko.phone && (
-                  <div className="flex items-center">
-                    <Phone className="h-5 w-5 text-[var(--color-primary)] mr-3 flex-shrink-0" />
-                    <a 
-                      href={`tel:${nko.phone}`} 
-                      className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
-                    >
-                      {nko.phone}
-                    </a>
-                  </div>
-                )}
-                
-                {nko.email && (
-                  <div className="flex items-center">
-                    <Mail className="h-5 w-5 text-[var(--color-primary)] mr-3 flex-shrink-0" />
-                    <a 
-                      href={`mailto:${nko.email}`} 
-                      className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
-                    >
-                      {nko.email}
-                    </a>
-                  </div>
-                )}
-                
-                {nko.website && (
+                {nko.meta?.url && (
                   <div className="flex items-center">
                     <Globe className="h-5 w-5 text-[var(--color-primary)] mr-3 flex-shrink-0" />
-                    <a 
-                      href={nko.website} 
-                      target="_blank" 
+                    <a
+                      href={nko.meta.url}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
                     >
-                      {nko.website}
+                      {nko.meta.url}
                     </a>
-                  </div>
-                )}
-                
-                {/* Социальные сети */}
-                {nko.social && (
-                  <div className="pt-4 border-t border-[var(--color-border)]">
-                    <p className="text-sm font-medium text-[var(--color-text-primary)] mb-2">
-                      Социальные сети:
-                    </p>
-                    <div className="flex gap-2">
-                      {nko.social.vk && (
-                        <a 
-                          href={nko.social.vk} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-[var(--color-primary)] text-white rounded text-sm hover:bg-[var(--color-primary-hover)] transition-colors"
-                        >
-                          VK
-                        </a>
-                      )}
-                      {nko.social.telegram && (
-                        <a 
-                          href={nko.social.telegram} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-[var(--color-primary)] text-white rounded text-sm hover:bg-[var(--color-primary-hover)] transition-colors"
-                        >
-                          Telegram
-                        </a>
-                      )}
-                    </div>
                   </div>
                 )}
               </CardContent>
@@ -195,7 +264,7 @@ export default async function NKODetailPage({ params }: PageProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-[var(--color-text-secondary)] leading-relaxed">
-                  {nko.fullDescription || nko.description}
+                  {nko.description}
                 </p>
               </CardContent>
             </Card>
@@ -214,7 +283,7 @@ export default async function NKODetailPage({ params }: PageProps) {
             </CardHeader>
             <CardContent>
               <p className="text-[var(--color-text-secondary)] leading-relaxed">
-                {nko.volunteerFunction}
+                Информация о волонтерских возможностях будет доступна скоро.
               </p>
               <div className="mt-6">
                 <Button size="lg" className="btn-primary">
@@ -227,33 +296,6 @@ export default async function NKODetailPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Проекты организации */}
-      {nko.projects && nko.projects.length > 0 && (
-        <section className="py-12 bg-[var(--color-bg-secondary)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-8">
-              Наши проекты
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {nko.projects.map((project, index) => (
-                <Card key={index} className="border-[var(--color-border)] hover-lift">
-                  <CardContent className="p-6">
-                    <div className="w-12 h-12 bg-[var(--color-primary)]/10 rounded-lg flex items-center justify-center mb-4">
-                      <Calendar className="h-6 w-6 text-[var(--color-primary)]" />
-                    </div>
-                    <h4 className="font-semibold text-[var(--color-text-primary)] mb-2">
-                      {project}
-                    </h4>
-                    <p className="text-[var(--color-text-secondary)] text-sm">
-                      Узнайте больше о нашем проекте и присоединяйтесь к нам
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       <Footer />
     </div>
