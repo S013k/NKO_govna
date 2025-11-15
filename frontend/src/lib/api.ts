@@ -125,7 +125,7 @@ class ApiClient {
     console.log('DEBUG: /users/me/ response status:', response.status)
 
     if (!response.ok) {
-      throw new Error('Failed to refresh token')
+      throw new Error('Не удалось обновить токен')
     }
   }
 
