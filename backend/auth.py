@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 import security
 from database import get_db
@@ -40,13 +41,14 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
-def get_user(db: Session, login: str):
-    return db.query(UserInDB).filter(UserInDB.login == login).first()
+async def get_user(db: AsyncSession, login: str):
+    result = await db.execute(select(UserInDB).filter(UserInDB.login == login))
+    return result.scalar_one_or_none()
 
 
 @router.post("/auth/register", response_model=User)
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = get_user(db, login=user.login)
+async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
+    db_user = await get_user(db, login=user.login)
     if db_user:
         raise HTTPException(status_code=400, detail="Login already registered")
 
@@ -60,16 +62,16 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         salt=salt,
     )
     db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    await db.commit()
+    await db.refresh(db_user)
     return db_user
 
 
 @router.post("/auth/login", response_model=Token)
-def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
 ):
-    user = get_user(db, login=form_data.username)
+    user = await get_user(db, login=form_data.username)
     if not user or not security.verify_password(
         form_data.password, user.salt, user.hash
     ):
@@ -83,7 +85,7 @@ def login_for_access_token(
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -100,7 +102,7 @@ async def get_current_user(
         token_data = TokenData(login=login)
     except JWTError:
         raise credentials_exception
-    user = get_user(db, login=token_data.login)
+    user = await get_user(db, login=token_data.login)
     if user is None:
         raise credentials_exception
     return user
