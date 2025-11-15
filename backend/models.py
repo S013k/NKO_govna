@@ -4,10 +4,38 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Column, Integer, String, Text, SmallInteger, BigInteger, ForeignKey
-from sqlalchemy.dialects.postgresql import ENUM, JSONB, POINT
-from sqlalchemy.types import TIMESTAMP
+from sqlalchemy.dialects.postgresql import ENUM, JSONB
+from sqlalchemy.types import TIMESTAMP, UserDefinedType
 
 from database import Base
+
+
+# Кастомный тип для PostgreSQL POINT
+class Point(UserDefinedType):
+    cache_ok = True
+    
+    def get_col_spec(self):
+        return "POINT"
+    
+    def bind_processor(self, dialect):
+        def process(value):
+            if value is None:
+                return None
+            if isinstance(value, (tuple, list)) and len(value) == 2:
+                return f"({value[0]},{value[1]})"
+            return value
+        return process
+    
+    def result_processor(self, dialect, coltype):
+        def process(value):
+            if value is None:
+                return None
+            # PostgreSQL возвращает POINT как строку "(x,y)"
+            if isinstance(value, str):
+                coords = value.strip("()").split(",")
+                return (float(coords[0]), float(coords[1]))
+            return value
+        return process
 
 
 class UsersRoles(str, Enum):
@@ -56,7 +84,7 @@ class NKOInDB(Base):
     logo = Column(Text)
     address = Column(Text, nullable=False)
     city_id = Column(SmallInteger, ForeignKey("cities.id"), nullable=False)
-    coords = Column(POINT, nullable=False)
+    coords = Column(Point, nullable=False)
     meta = Column(JSONB)
     created_at = Column(TIMESTAMP(timezone=True), server_default="now()")
 
@@ -88,7 +116,7 @@ class EventInDB(Base):
     description = Column(Text)
     address = Column(Text)
     picture = Column(Text)
-    coords = Column(POINT)
+    coords = Column(Point)
     starts_at = Column(TIMESTAMP(timezone=True))
     finish_at = Column(TIMESTAMP(timezone=True))
     created_by = Column(BigInteger, ForeignKey("users.id"), nullable=False)

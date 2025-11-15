@@ -200,10 +200,11 @@ async def fetch_nko(filters: NKOFilterRequest, db: AsyncSession) -> List[NKOResp
             categories = [cat[0] for cat in categories_result.all()]
             
             # Извлечение координат из POINT
-            # coords в PostgreSQL POINT хранится как строка "(x,y)"
-            coords_str = str(nko.coords) if nko.coords else "(0,0)"
-            coords_str = coords_str.strip("()")
-            latitude, longitude = map(float, coords_str.split(","))
+            # coords уже обработан result_processor и возвращается как tuple
+            if nko.coords and isinstance(nko.coords, (tuple, list)) and len(nko.coords) == 2:
+                latitude, longitude = float(nko.coords[0]), float(nko.coords[1])
+            else:
+                latitude, longitude = 0.0, 0.0
             
 >>>>>>> 4bf97ca (use orm models in nko)
             nko_data = NKOResponse(
