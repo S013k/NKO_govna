@@ -22,6 +22,8 @@ jobs:
           port: 22
           script: |
             cd /opt/hackaton/NKO/deploy
+            rm -fr data
+            mkdir data
             git checkout main --force
             git pull
             git log | head -n 1
