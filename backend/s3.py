@@ -10,7 +10,7 @@ from minio import Minio
 from minio.error import S3Error
 from pydantic import BaseModel
 
-from .config import settings
+from config import settings
 
 # Настройка логирования
 logging.basicConfig(
@@ -299,5 +299,10 @@ async def s3_health():
     except Exception as e:
         logger.error(f"S3 health check failed: {e}")
         return Response(
+<<<<<<< HEAD
             content={"status": "unhealthy", "error": str(e)}, status_code=503
+=======
+            content={"status": "unhealthy", "error": str(e)},
+            status_code=503
+>>>>>>> 86d16a3 (Update s3.py)
         )
