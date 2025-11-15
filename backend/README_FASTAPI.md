@@ -35,7 +35,7 @@ python main.py
 ### Пример запроса
 
 ```bash
-curl http://localhost:8000/ping
+curl http://localhost:8000/api/ping
 ```
 
 Ответ:

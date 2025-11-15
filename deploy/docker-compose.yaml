@@ -50,8 +50,6 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.backend
-    ports:
-      - "8000:8000"
     environment:
       - APP_NAME=НКО Добрые дела Росатома API
       - DEBUG=False
