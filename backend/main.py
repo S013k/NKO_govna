@@ -1,14 +1,31 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
-from .config import settings
-from .s3 import router as s3_router
-from . import auth
+from contextlib import asynccontextmanager
+from typing import List
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from config import settings
+from s3 import router as s3_router
+import auth
+from db import init_db, close_db, get_db
+from nko import fetch_nko, NKOFilterRequest, NKOResponse
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Управление жизненным циклом приложения"""
+    # Startup
+    await init_db()
+    yield
+    # Shutdown
+    await close_db()
 app = FastAPI(
     title="НКО Добрые дела Росатома API",
     description="Backend API для портала Добрые дела Росатома",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS настройки
@@ -57,6 +74,21 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat()
     }
+
+
+@app.post("/nko", response_model=List[NKOResponse])
+async def get_nko(filters: NKOFilterRequest, db: AsyncSession = Depends(get_db)):
+    """
+    Получение списка НКО с фильтрацией
+    
+    Args:
+        filters: Параметры фильтрации (jwt_token, city, favorite, category, regex)
+        db: Сессия базы данных
+        
+    Returns:
+        Список НКО с их категориями
+    """
+    return await fetch_nko(filters, db)
 
 
 if __name__ == "__main__":
