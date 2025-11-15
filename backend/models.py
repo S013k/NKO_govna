@@ -1,7 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, Tuple, List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.dialects.postgresql import ENUM
+from .database import Base
 
 class UsersRoles(str, Enum):
     nko = 'nko'
@@ -21,19 +24,22 @@ class UserCreate(BaseModel):
     password: str
     role: UsersRoles
 
-class UserInDB(BaseModel):
-    id: int
-    full_name: str
-    login: str
-    role: UsersRoles
-    hash: str
-    salt: str
+class UserInDB(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String)
+    login = Column(String, unique=True, index=True)
+    hash = Column(String)
+    salt = Column(String)
+    role = Column(ENUM(UsersRoles, name="users_roles", create_type=False), nullable=False)
 
 class User(BaseModel):
     id: int
     full_name: str
     login: str
     role: UsersRoles
+
+    model_config = ConfigDict(from_attributes=True)
 
 class Token(BaseModel):
     access_token: str

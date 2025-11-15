@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from minio import Minio
 from minio.error import S3Error
 
-from config import settings
+from .config import settings
 
 # Настройка логирования
 logging.basicConfig(
