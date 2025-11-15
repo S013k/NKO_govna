@@ -1,22 +1,22 @@
 #!/bin/bash
 
-curl -X POST http://localhost/api/nko \
-  -H "Content-Type: application/json" \
-  -d '{"jwt_token": "test-token", "city": "Москва"}'
+# Получение списка НКО с фильтром по городу
+curl -X GET "http://localhost/api/nko?jwt_token=test-token&city=Москва"
 
-curl -X POST http://localhost/api/nko \
-  -H "Content-Type: application/json" \
-  -d '{"jwt_token": "test-token", "category": "Экологические инициативы"}'
+# Получение списка НКО с фильтром по категории
+curl -X GET "http://localhost/api/nko?jwt_token=test-token&category=Экологические%20инициативы"
 
-curl -X POST http://localhost/api/nko \
-  -H "Content-Type: application/json" \
-  -d '{"jwt_token": "test-token", "regex": "инициативы"}'
+# Получение списка НКО с фильтром по regex
+curl -X GET "http://localhost/api/nko?jwt_token=test-token&regex=инициативы"
+
+# Получение всех НКО без фильтров
+curl -X GET "http://localhost/api/nko?jwt_token=test-token"
 
 # Получение конкретного НКО по ID
 curl -X GET http://localhost/api/nko/1
 
 # Создание нового НКО
-curl -X POST http://localhost/api/nko/add \
+curl -X POST http://localhost/api/nko \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Тестовый фонд помощи",

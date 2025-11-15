@@ -138,13 +138,44 @@ paths:
   /nko:
     get:
       tags: [Публичные данные]
-      summary: Получить список одобренных НКО
+      summary: Получить список НКО с фильтрацией
+      description: Фильтрация по городу, категориям, избранному и regex поиску
       parameters:
-        - name: city_id
+        - name: jwt_token
           in: query
+          required: true
           schema:
-            type: integer
-          description: ID города для фильтрации
+            type: string
+          description: JWT токен пользователя
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Название города для фильтрации
+          example: "Москва"
+        - name: favorite
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Фильтр по избранным НКО
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Список категорий для фильтрации
+          example: ["Помощь детям", "Образование"]
+        - name: regex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Регулярное выражение для поиска в названии и описании
+          example: "инициативы"
       responses:
         '200':
           description: Список НКО
@@ -153,12 +184,35 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NKO'
+                  $ref: '#/components/schemas/NKOResponse'
+        '500':
+          description: Ошибка базы данных
+    post:
+      tags: [НКО (Некоммерческие организации)]
+      summary: Создать новое НКО
+      description: Создание нового НКО с проверкой существования города и категорий
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NKOCreateRequest'
+      responses:
+        '201':
+          description: НКО успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NKOResponse'
+        '404':
+          description: Город или категория не найдены
+        '500':
+          description: Ошибка базы данных
 
   /nko/{nkoId}:
     get:
       tags: [Публичные данные]
-      summary: Получить детальную информацию об одном НКО
+      summary: Получить детальную информацию об одном НКО по ID
       parameters:
         - name: nkoId
           in: path
@@ -171,9 +225,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NKO'
+                $ref: '#/components/schemas/NKOResponse'
         '404':
           description: НКО не найдено
+        '500':
+          description: Ошибка базы данных
 
   /events:
     get:
@@ -236,26 +292,8 @@ paths:
                   $ref: '#/components/schemas/KnowledgeBaseMaterial'
 
   # ===============================================================
-  # НКО (управление)
+  # НКО (управление) - дополнительные эндпоинты
   # ===============================================================
-  /nko:
-    post:
-      tags: [НКО (Некоммерческие организации)]
-      summary: Зарегистрировать новое НКО (отправка на модерацию)
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NKOInput'
-      responses:
-        '202':
-          description: Заявка на регистрацию НКО принята и отправлена на модерацию
-        '401':
-          description: Пользователь не авторизован
-
   /nko/{nkoId}:
     put:
       tags: [НКО (Некоммерческие организации)]
@@ -274,7 +312,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NKOInput'
+              $ref: '#/components/schemas/NKOCreateRequest'
       responses:
         '200':
           description: НКО успешно обновлено
@@ -381,70 +419,147 @@ components:
       bearerFormat: JWT
 
   schemas:
-    NKO:
+    NKOFilterRequest:
+      type: object
+      required:
+        - jwt_token
+      properties:
+        jwt_token:
+          type: string
+          description: JWT токен пользователя
+        city:
+          type: string
+          nullable: true
+          description: Название города для фильтрации
+          example: "Москва"
+        favorite:
+          type: boolean
+          nullable: true
+          description: Фильтр по избранным НКО
+        category:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Список категорий для фильтрации
+          example: ["Помощь детям", "Образование"]
+        regex:
+          type: string
+          nullable: true
+          description: Регулярное выражение для поиска в названии и описании
+          example: "инициативы"
+
+    NKOCreateRequest:
+      type: object
+      required:
+        - name
+        - address
+        - city
+        - latitude
+        - longitude
+        - categories
+      properties:
+        name:
+          type: string
+          description: Название НКО
+          example: "Благотворительный фонд «Подари жизнь»"
+        description:
+          type: string
+          nullable: true
+          description: Описание деятельности НКО
+          example: "Помощь детям с онкологическими заболеваниями"
+        logo:
+          type: string
+          nullable: true
+          description: URL логотипа НКО
+          example: "https://podari-zhizn.ru/logo.png"
+        address:
+          type: string
+          description: Адрес НКО
+          example: "г. Москва, ул. Доватора, д. 13"
+        city:
+          type: string
+          description: Название города
+          example: "Москва"
+        latitude:
+          type: number
+          format: float
+          description: Широта координат
+          example: 55.7522
+        longitude:
+          type: number
+          format: float
+          description: Долгота координат
+          example: 37.5665
+        meta:
+          type: object
+          nullable: true
+          description: Дополнительные метаданные (JSONB)
+          example: {"url": "https://podari-zhizn.ru", "phone": "+7 (495) 123-45-67"}
+        categories:
+          type: array
+          items:
+            type: string
+          description: Список названий категорий НКО
+          example: ["Помощь детям", "Медицинская помощь"]
+
+    NKOResponse:
       type: object
       properties:
         id:
           type: integer
-          example: 210
+          description: ID НКО
+          example: 1
         name:
           type: string
-          example: "Волонтеры-медики"
-        category:
-          type: string
-          example: "Медицина и ЗОЖ"
+          description: Название НКО
+          example: "Благотворительный фонд «Подари жизнь»"
         description:
           type: string
-          example: "Краткое описание деятельности в 2-3 предложения."
+          nullable: true
+          description: Описание деятельности НКО
+          example: "Помощь детям с онкологическими заболеваниями"
+        logo:
+          type: string
+          nullable: true
+          description: URL логотипа НКО
+          example: "https://podari-zhizn.ru/logo.png"
         address:
           type: string
-          example: "г. Обнинск, ул. Ленина, д. 1"
-        logo_url:
+          description: Адрес НКО
+          example: "г. Москва, ул. Доватора, д. 13"
+        city:
           type: string
-          format: uri
-          example: "https://example.com/logo.png"
-        website_url:
+          nullable: true
+          description: Название города
+          example: "Москва"
+        latitude:
+          type: number
+          format: float
+          description: Широта координат
+          example: 55.7522
+        longitude:
+          type: number
+          format: float
+          description: Долгота координат
+          example: 37.5665
+        meta:
+          type: object
+          nullable: true
+          description: Дополнительные метаданные (JSONB)
+          example: {"url": "https://podari-zhizn.ru"}
+        created_at:
           type: string
-          format: uri
-          example: "https://example-nko.com"
-        social_links:
+          format: date-time
+          nullable: true
+          description: Дата создания записи
+          example: "2024-01-20T12:00:00+03:00"
+        categories:
           type: array
           items:
             type: string
-            format: uri
-          example: ["https://vk.com/nko", "https://t.me/nko"]
-        city_id:
-          type: integer
-          example: 19
-        status:
-          type: string
-          enum: [approved, pending_moderation, rejected]
-          example: "approved"
-
-    NKOInput:
-      type: object
-      properties:
-        name:
-          type: string
-        category:
-          type: string
-        description:
-          type: string
-        address:
-          type: string
-        logo_url:
-          type: string
-          format: uri
-        website_url:
-          type: string
-          format: uri
-        social_links:
-          type: array
-          items:
-            type: string
-            format: uri
-        city_id:
-          type: integer
+          description: Список категорий НКО
+          example: ["Помощь детям", "Медицинская помощь"]
 
     Event:
       type: object

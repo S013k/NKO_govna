@@ -87,18 +87,36 @@ async def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 
-@app.post("/nko", response_model=List[NKOResponse])
-def get_nko(filters: NKOFilterRequest, db: Session = Depends(get_db)):
+@app.get("/nko", response_model=List[NKOResponse])
+def get_nko(
+    jwt_token: str,
+    city: Optional[str] = None,
+    favorite: Optional[bool] = None,
+    category: Optional[List[str]] = None,
+    regex: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
     """
     Получение списка НКО с фильтрацией
 
     Args:
-        filters: Параметры фильтрации (jwt_token, city, favorite, category, regex)
+        jwt_token: JWT токен пользователя
+        city: Фильтр по городу (опционально)
+        favorite: Фильтр по избранным (опционально)
+        category: Фильтр по категориям (опционально)
+        regex: Регулярное выражение для поиска (опционально)
         db: Сессия базы данных
 
     Returns:
         Список НКО с их категориями
     """
+    filters = NKOFilterRequest(
+        jwt_token=jwt_token,
+        city=city,
+        favorite=favorite,
+        category=category,
+        regex=regex
+    )
     return fetch_nko(filters, db)
 
 
@@ -161,7 +179,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return login_for_access_token(form_data, db)
 
 
-@app.post("/nko/add", response_model=NKOResponse, status_code=status.HTTP_201_CREATED)
+@app.post("/nko", response_model=NKOResponse, status_code=status.HTTP_201_CREATED)
 def add_nko(nko_data: NKOCreateRequest, db: Session = Depends(get_db)):
     """
     Создание нового НКО
