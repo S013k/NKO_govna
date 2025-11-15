@@ -208,7 +208,8 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
             )}
           </div>
 
-          <Button
+          <div className="mt-6">
+            <Button
             type="submit"
             disabled={isLoading}
             className="w-full h-11 text-base font-semibold text-white hover:opacity-90 transition-opacity"
@@ -222,7 +223,8 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
             ) : (
               'Войти'
             )}
-          </Button>
+            </Button>
+          </div>
 
           <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">

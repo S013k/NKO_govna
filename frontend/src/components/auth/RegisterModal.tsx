@@ -1,13 +1,12 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Loader2, AlertCircle, Lock, User, Building } from 'lucide-react'
+import { Loader2, AlertCircle, Lock, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface RegisterModalProps {
@@ -21,7 +20,6 @@ interface FormData {
   login: string
   password: string
   confirmPassword: string
-  role: 'nko' | 'user'
 }
 
 interface FormErrors {
@@ -29,7 +27,6 @@ interface FormErrors {
   login?: string
   password?: string
   confirmPassword?: string
-  role?: string
   general?: string
 }
 
@@ -38,8 +35,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
     full_name: '',
     login: '',
     password: '',
-    confirmPassword: '',
-    role: 'user'
+    confirmPassword: ''
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -48,13 +44,11 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
     login: boolean
     password: boolean
     confirmPassword: boolean
-    role: boolean
   }>({
     full_name: false,
     login: false,
     password: false,
-    confirmPassword: false,
-    role: false
+    confirmPassword: false
   });
 
   const { register: authRegister } = useAuth()
@@ -106,26 +100,11 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
     }
   }
 
-  const handleRoleChange = (value: string) => {
-    setFormData(prev => ({ ...prev, role: value as 'nko' | 'user' }))
-    
-    if (touched.role) {
-      setErrors(prev => ({ ...prev, role: undefined, general: undefined }))
-    }
-  }
-
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setTouched(prev => ({ ...prev, [name]: true }))
     const error = validateField(name as keyof FormData, value)
     setErrors(prev => ({ ...prev, [name]: error }))
-  }
-
-  const handleRoleBlur = () => {
-    setTouched(prev => ({ ...prev, role: true }))
-    if (!formData.role) {
-      setErrors(prev => ({ ...prev, role: 'Выберите тип аккаунта' }))
-    }
   }
 
   const validateForm = (): boolean => {
@@ -135,17 +114,12 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
     newErrors.password = validateField('password', formData.password)
     newErrors.confirmPassword = validateField('confirmPassword', formData.confirmPassword)
     
-    if (!formData.role) {
-      newErrors.role = 'Выберите тип аккаунта'
-    }
-    
     setErrors(newErrors)
     setTouched({
       full_name: true,
       login: true,
       password: true,
-      confirmPassword: true,
-      role: true
+      confirmPassword: true
     })
     
     return !Object.values(newErrors).some(error => error !== undefined)
@@ -162,22 +136,20 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
     setErrors({})
 
     try {
-     await authRegister(formData.full_name, formData.login, formData.password, formData.role)
+     await authRegister(formData.full_name, formData.login, formData.password, 'user')
      onClose()
      // Очищаем форму после успешной регистрации
      setFormData({
        full_name: '',
        login: '',
        password: '',
-       confirmPassword: '',
-       role: 'user'
+       confirmPassword: ''
      })
      setTouched({
        full_name: false,
        login: false,
        password: false,
-       confirmPassword: false,
-       role: false
+       confirmPassword: false
      })
     } catch (err) {
       setErrors({ general: err instanceof Error ? err.message : 'Ошибка регистрации' })
@@ -193,16 +165,14 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
        full_name: '',
        login: '',
        password: '',
-       confirmPassword: '',
-       role: 'user'
-     })
+       confirmPassword: ''
+      })
      setTouched({
        full_name: false,
        login: false,
        password: false,
-       confirmPassword: false,
-       role: false
-     })
+       confirmPassword: false
+      })
       onClose()
     }
   }
@@ -214,16 +184,14 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
        full_name: '',
        login: '',
        password: '',
-       confirmPassword: '',
-       role: 'user'
-     })
+       confirmPassword: ''
+      })
      setTouched({
        full_name: false,
        login: false,
        password: false,
-       confirmPassword: false,
-       role: false
-     })
+       confirmPassword: false
+      })
       onSwitchToLogin()
     }
   }
@@ -307,41 +275,6 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role" className="text-sm font-medium text-foreground">
-              Тип аккаунта
-            </Label>
-            <div className="relative">
-              <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-              <Select
-                value={formData.role}
-                onValueChange={handleRoleChange}
-                disabled={isLoading}
-              >
-                <SelectTrigger 
-                  className={`pl-10 h-11 ${
-                    errors.role && touched.role
-                      ? 'border-red-500 focus-visible:ring-red-500'
-                      : 'focus-visible:ring-[#0066B3]'
-                  }`}
-                  onBlur={handleRoleBlur}
-                >
-                  <SelectValue placeholder="Выберите тип аккаунта" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Пользователь</SelectItem>
-                  <SelectItem value="nko">НКО</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {errors.role && touched.role && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.role}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium text-foreground">
               Пароль
             </Label>
@@ -401,7 +334,8 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
             )}
           </div>
 
-          <Button
+          <div className="mt-6">
+            <Button
             type="submit"
             disabled={isLoading}
             className="w-full h-11 text-base font-semibold text-white hover:opacity-90 transition-opacity"
@@ -415,7 +349,8 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
             ) : (
               'Зарегистрироваться'
             )}
-          </Button>
+            </Button>
+          </div>
 
           <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">
