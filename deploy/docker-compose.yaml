@@ -34,8 +34,8 @@ services:
   minio-cora:
     image: minio/minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9990:9000"
+      - "9991:9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
@@ -55,6 +55,12 @@ services:
       - DEBUG=False
       - HOST=0.0.0.0
       - PORT=8000
+      - MINIO_ENDPOINT=minio-cora:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_SECURE=${MINIO_SECURE}
+    depends_on:
+      - minio-cora
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
