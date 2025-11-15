@@ -1,22 +1,57 @@
+'use client'
+
 import { Header } from '@/components/Header'
 import { Hero } from '@/components/Hero'
 import { NKOCard } from '@/components/NKOCard'
 import { NewsCard } from '@/components/NewsCard'
 import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
-import { nkoData, categories } from '@/data/nko'
+import { fetchNKO, NKOResponse } from '@/lib/api'
 import { newsData } from '@/data/news'
 import { Heart, Users, Calendar, Award, ArrowRight, MapPin } from 'lucide-react'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
 export default function HomePage() {
   console.log('=== HomePage: Полная версия ===')
+  
+  const [nkoData, setNKOData] = useState<NKOResponse[]>([])
+  const [loading, setLoading] = useState(true)
   
   // Получаем первые 6 НКО для главной страницы
   const featuredNKO = nkoData.slice(0, 6)
   
   // Получаем последние 3 новости
   const latestNews = newsData.slice(0, 3)
+
+  // Загрузка данных при монтировании
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchNKO()
+        setNKOData(data)
+      } catch (error) {
+        console.error('Error loading NKO data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <Hero />
+        <div className="flex justify-center items-center py-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
 
   try {
     console.log('✅ Начало рендеринга полной версии')
