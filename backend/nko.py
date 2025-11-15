@@ -32,7 +32,7 @@ class NKOResponse(BaseModel):
 
 async def fetch_nko(
     filters: NKOFilterRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession
 ) -> List[NKOResponse]:
     """
     Получение списка НКО с фильтрацией

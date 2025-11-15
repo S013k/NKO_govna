@@ -1,11 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import List
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from db import init_db, close_db
+from db import init_db, close_db, get_db
 from nko import fetch_nko, NKOFilterRequest, NKOResponse
 
 
@@ -77,18 +78,19 @@ async def health_check():
     }
 
 
-@app.post("/api/nko", response_model=List[NKOResponse])
-async def get_nko(filters: NKOFilterRequest):
+@app.post("/nko", response_model=List[NKOResponse])
+async def get_nko(filters: NKOFilterRequest, db: AsyncSession = Depends(get_db)):
     """
     Получение списка НКО с фильтрацией
     
     Args:
         filters: Параметры фильтрации (jwt_token, city, favorite, category, regex)
+        db: Сессия базы данных
         
     Returns:
         Список НКО с их категориями
     """
-    return await fetch_nko(filters)
+    return await fetch_nko(filters, db)
 
 
 if __name__ == "__main__":
