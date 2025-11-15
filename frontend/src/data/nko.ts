@@ -33,7 +33,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/social_fond',
       telegram: 'https://t.me/social_fond'
     },
-    logo: '/images/nko-logo-1.png',
+    logo: '/api/s3/nko-logo/nko-logo-1.png',
     volunteerFunction: 'Сортировка и упаковка гуманитарной помощи, доставка продуктов, помощь в проведении мероприятий, юридические консультации',
     projects: ['Продуктовый банк', 'Теплые вещи', 'Юридическая помощь'],
     city: 'Москва'
@@ -52,7 +52,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/eco_patrol',
       telegram: 'https://t.me/eco_patrol'
     },
-    logo: '/images/nko-logo-2.png',
+    logo: '/api/s3/nko-logo/nko-logo-2.png',
     volunteerFunction: 'Участие в субботниках, проведение экологических уроков, мониторинг загрязнений, посадка деревьев',
     projects: ['Чистый город', 'Зеленые легкие', 'Эко-образование'],
     city: 'Москва'
@@ -71,7 +71,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/child_center',
       telegram: 'https://t.me/child_center'
     },
-    logo: '/images/nko-logo-3.png',
+    logo: '/api/s3/nko-logo/nko-logo-3.png',
     volunteerFunction: 'Помощь в проведении занятий, организация мероприятий, проверка домашних заданий',
     projects: ['Подготовка к школе', 'Английский для детей', 'Программирование'],
     city: 'Обнинск'
@@ -90,7 +90,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/sport_reserve',
       telegram: 'https://t.me/sport_reserve'
     },
-    logo: '/images/nko-logo-4.png',
+    logo: '/api/s3/nko-logo/nko-logo-4.png',
     volunteerFunction: 'Тренировка детских групп, организация соревнований, помощь в проведении мероприятий',
     projects: ['Футбол для всех', 'Волейбольная лига', 'Легкая атлетика'],
     city: 'Саров'
@@ -109,7 +109,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/cultural_heritage',
       telegram: 'https://t.me/cultural_heritage'
     },
-    logo: '/images/nko-logo-5.png',
+    logo: '/api/s3/nko-logo/nko-logo-5.png',
     volunteerFunction: 'Помощь в организации выставок, проведение экскурсий, работа с архивами',
     projects: ['Галерея искусств', 'Музыкальные вечера', 'Исторические лекции'],
     city: 'Димитровград'
@@ -128,7 +128,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/veterans_help',
       telegram: 'https://t.me/veterans_help'
     },
-    logo: '/images/nko-logo-6.png',
+    logo: '/api/s3/nko-logo/nko-logo-6.png',
     volunteerFunction: 'Посещение на дому, помощь по хозяйству, организация мероприятий, доставка лекарств',
     projects: ['Память поколений', 'Забота', 'Ветеранский клуб'],
     city: 'Железногорск'
@@ -147,7 +147,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/animals_help',
       telegram: 'https://t.me/animals_help'
     },
-    logo: '/images/nko-logo-7.png',
+    logo: '/api/s3/nko-logo/nko-logo-7.png',
     volunteerFunction: 'Уход за животными, выгул собак, помощь в уборке, поиск хозяев',
     projects: ['Приют "Добрый дом"', 'Стань хозяином', 'Уроки доброты'],
     city: 'Озерск'
@@ -166,7 +166,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/youth_initiatives',
       telegram: 'https://t.me/youth_initiatives'
     },
-    logo: '/images/nko-logo-8.png',
+    logo: '/api/s3/nko-logo/nko-logo-8.png',
     volunteerFunction: 'Проведение тренингов, менторство, организация мероприятий, помощь в проектах',
     projects: ['Бизнес-инкубатор', 'Лидерская школа', 'Социальные проекты'],
     city: 'Лесной'
@@ -185,7 +185,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/health_generation',
       telegram: 'https://t.me/health_generation'
     },
-    logo: '/images/nko-logo-9.png',
+    logo: '/api/s3/nko-logo/nko-logo-9.png',
     volunteerFunction: 'Помощь в организации медосмотров, проведение лекций, измерение показателей здоровья',
     projects: ['День здоровья', 'Школа правильного питания', 'Профилактика'],
     city: 'Нововоронеж'
@@ -204,7 +204,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/art_workshop',
       telegram: 'https://t.me/art_workshop'
     },
-    logo: '/images/nko-logo-10.png',
+    logo: '/api/s3/nko-logo/nko-logo-10.png',
     volunteerFunction: 'Помощь в проведении занятий, организация выставок, подготовка материалов',
     projects: ['Детская студия', 'Взрослые курсы', 'Ярмарка мастеров'],
     city: 'Трехгорный'
@@ -223,7 +223,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/green_city',
       telegram: 'https://t.me/green_city'
     },
-    logo: '/images/nko-logo-11.png',
+    logo: '/api/s3/nko-logo/nko-logo-11.png',
     volunteerFunction: 'Посадка деревьев и цветов, уход за газонами, уборка территорий',
     projects: ['Парк мечты', 'Цветущие дворы', 'Алеи памяти'],
     city: 'Удомля'
@@ -242,7 +242,7 @@ export const nkoData: NKO[] = [
       vk: 'https://vk.com/library_future',
       telegram: 'https://t.me/library_future'
     },
-    logo: '/images/nko-logo-12.png',
+    logo: '/api/s3/nko-logo/nko-logo-12.png',
     volunteerFunction: 'Помощь в организации мероприятий, работа с читателями, оцифровка материалов',
     projects: ['Цифровая грамотность', 'Книжный клуб', 'Детская читальня'],
     city: 'Снежинск'

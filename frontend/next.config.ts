@@ -11,6 +11,17 @@ const nextConfig: NextConfig = {
       'node_modules/@next/swc-win32-x64-msvc',
     ],
   },
+  images: {
+    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '80',
+        pathname: '/api/s3/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

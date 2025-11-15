@@ -3,7 +3,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MapPin, Phone, Mail, Globe, ExternalLink } from 'lucide-react'
-import Image from 'next/image'
+import { NKOLogo } from '@/components/NKOLogo'
 import Link from 'next/link'
 import { NKO } from '@/data/nko'
 
@@ -18,12 +18,12 @@ export function NKOCard({ nko }: NKOCardProps) {
         <div className="flex items-start justify-between mb-4">
           <div className="w-16 h-16 bg-[var(--color-bg-secondary)] rounded-lg flex items-center justify-center">
             {nko.logo ? (
-              <Image 
-                src={nko.logo} 
-                alt={nko.name}
+              <NKOLogo
+                logoId={nko.id}
                 width={64}
                 height={64}
                 className="w-12 h-12 object-contain"
+                alt={nko.name}
               />
             ) : (
               <div className="w-12 h-12 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">

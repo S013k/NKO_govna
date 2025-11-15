@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Globe, Facebook, Twitter, Linkedin, Youtube } from 'lucide-react'
-import Image from 'next/image'
+import { RosatomLogo } from '@/components/RosatomLogo'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -14,10 +14,9 @@ export function Footer() {
           {/* О проекте */}
           <div className="lg:col-span-1">
             <div className="mb-4">
-              <Image 
-                src="/images/LOGO_ROSATOM_rus_HOR_COLOR_PNG.png" 
-                alt="Росатом" 
-                width={120} 
+              <RosatomLogo
+                type="horizontalColor"
+                width={120}
                 height={40}
                 className="h-10 w-auto"
               />

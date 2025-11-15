@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Menu, X, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import Image from 'next/image'
+import { RosatomLogo } from '@/components/RosatomLogo'
 import { cities } from '@/data/nko'
 
 export function Header() {
@@ -18,12 +18,12 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Логотип */}
           <Link href="/" className="flex items-center">
-            <Image 
-              src="/images/LOGO_ROSATOM_rus_HOR_COLOR_PNG.png" 
-              alt="Росатом" 
-              width={120} 
+            <RosatomLogo
+              type="horizontalColor"
+              width={120}
               height={40}
               className="h-10 w-auto"
+              priority
             />
           </Link>
 

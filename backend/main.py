@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 
+from config import settings
+from s3 import router as s3_router
+
 app = FastAPI(
     title="НКО Добрые дела Росатома API",
     description="Backend API для портала Добрые дела Росатома",
@@ -12,11 +15,14 @@ app = FastAPI(
 # CORS настройки
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В продакшене указать конкретные домены
+    allow_origins=settings.cors_origins,  # Используем настройки из config
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Подключаем S3 роутеры
+app.include_router(s3_router, prefix="/s3", tags=["S3 Storage"])
 
 
 class PingResponse(BaseModel):
