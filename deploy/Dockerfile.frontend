@@ -2,6 +2,9 @@ FROM node AS base
 
 WORKDIR /app
 
+# Установка curl для healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 COPY ../frontend/package*.json ./
 
 RUN npm ci --only=production && npm cache clean --force

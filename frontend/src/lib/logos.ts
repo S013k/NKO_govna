@@ -68,7 +68,8 @@ export function getNKOLogoUrl(logoId: string): string {
  */
 export function getNKOLogoUrlWithFallback(logoId: string, fallbackLogo?: string): string {
   const nkoLogoUrl = getNKOLogoUrl(logoId)
-  return fallbackLogo || nkoLogoUrl
+  // Если fallback не указан, используем логотип Росатома vert_color из S3
+  return fallbackLogo || ROSATOM_LOGOS.verticalColor.path
 }
 
 /**
