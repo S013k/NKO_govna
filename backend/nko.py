@@ -1,14 +1,16 @@
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from fastapi import Depends, HTTPException
-from sqlalchemy import select, func, or_, and_, text
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
+from sqlalchemy import and_, func, or_, select, text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_db
 
 
 class NKOFilterRequest(BaseModel):
     """Модель запроса для фильтрации НКО"""
+
     jwt_token: str  # Пока просто строка
     city: Optional[str] = None
     favorite: Optional[bool] = None
@@ -18,6 +20,7 @@ class NKOFilterRequest(BaseModel):
 
 class NKOResponse(BaseModel):
     """Модель ответа с данными НКО"""
+
     id: int
     name: str
     description: Optional[str]
@@ -30,21 +33,18 @@ class NKOResponse(BaseModel):
     categories: List[str]
 
 
-async def fetch_nko(
-    filters: NKOFilterRequest,
-    db: AsyncSession
-) -> List[NKOResponse]:
+async def fetch_nko(filters: NKOFilterRequest, db: AsyncSession) -> List[NKOResponse]:
     """
     Получение списка НКО с фильтрацией
-    
+
     Args:
         filters: Параметры фильтрации
         db: Сессия базы данных
-        
+
     Returns:
         Список НКО с их категориями
     """
-    
+
     # Базовый SQL запрос с агрегацией категорий
     query_parts = [
         """
@@ -66,35 +66,35 @@ async def fetch_nko(
         LEFT JOIN nko_categories nc ON ncl.category_id = nc.id
         """
     ]
-    
+
     conditions = []
     params = {}
-    
+
     # Фильтр по городу (поиск в адресе)
     if filters.city:
         conditions.append("n.address ILIKE :city")
-        params['city'] = f"%{filters.city}%"
-    
+        params["city"] = f"%{filters.city}%"
+
     # Фильтр по категориям
     if filters.category and len(filters.category) > 0:
         conditions.append("nc.name = ANY(:categories)")
-        params['categories'] = filters.category
-    
+        params["categories"] = filters.category
+
     # Фильтр по regex (поиск в имени и описании)
     if filters.regex:
         conditions.append("(n.name ~* :regex OR n.description ~* :regex)")
-        params['regex'] = filters.regex
-    
+        params["regex"] = filters.regex
+
     # TODO: Фильтр по избранным (требует таблицы favorites и user_id из JWT)
     # if filters.favorite and filters.jwt_token:
     #     user_id = decode_jwt(filters.jwt_token)
     #     conditions.append("EXISTS (SELECT 1 FROM favorites WHERE nko_id = n.id AND user_id = :user_id)")
     #     params['user_id'] = user_id
-    
+
     # Добавление условий в запрос
     if conditions:
         query_parts.append("WHERE " + " AND ".join(conditions))
-    
+
     # Группировка для агрегации категорий
     query_parts.append(
         """
@@ -102,21 +102,21 @@ async def fetch_nko(
         ORDER BY n.created_at DESC
         """
     )
-    
+
     query_sql = " ".join(query_parts)
-    
+
     try:
         # Выполнение запроса
         result = await db.execute(text(query_sql), params)
         rows = result.fetchall()
-        
+
         # Преобразование результатов в список объектов NKOResponse
         nko_list = []
         for row in rows:
             # Парсинг координат из POINT типа PostgreSQL
-            coords_str = str(row.coords) if row.coords else '(0,0)'
-            coords_parts = coords_str.strip('()').split(',')
-            
+            coords_str = str(row.coords) if row.coords else "(0,0)"
+            coords_parts = coords_str.strip("()").split(",")
+
             nko_data = NKOResponse(
                 id=row.id,
                 name=row.name,
@@ -127,11 +127,11 @@ async def fetch_nko(
                 latitude=float(coords_parts[0]) if len(coords_parts) > 0 else 0.0,
                 longitude=float(coords_parts[1]) if len(coords_parts) > 1 else 0.0,
                 created_at=row.created_at.isoformat() if row.created_at else None,
-                categories=list(row.categories) if row.categories else []
+                categories=list(row.categories) if row.categories else [],
             )
             nko_list.append(nko_data)
-        
+
         return nko_list
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
