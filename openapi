@@ -167,7 +167,9 @@ paths:
             type: array
             items:
               type: string
-          description: Список категорий для фильтрации
+          style: form
+          explode: true
+          description: Список категорий для фильтрации (можно передать несколько раз)
           example: ["Помощь детям", "Образование"]
         - name: regex
           in: query

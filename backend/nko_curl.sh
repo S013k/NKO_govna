@@ -3,8 +3,11 @@
 # Получение списка НКО с фильтром по городу
 curl -X GET "http://localhost/api/nko?jwt_token=test-token&city=Москва"
 
-# Получение списка НКО с фильтром по категории
+# Получение списка НКО с фильтром по категории (одна категория)
 curl -X GET "http://localhost/api/nko?jwt_token=test-token&category=Экологические%20инициативы"
+
+# Получение списка НКО с фильтром по нескольким категориям
+curl -X GET "http://localhost/api/nko?jwt_token=test-token&category=Помощь%20детям&category=Образование"
 
 # Получение списка НКО с фильтром по regex
 curl -X GET "http://localhost/api/nko?jwt_token=test-token&regex=инициативы"
