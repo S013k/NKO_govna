@@ -16,12 +16,8 @@ async def init_db():
     
     database_url = os.getenv(
         "DATABASE_URL",
-        "postgresql://user:password@localhost:5432/nko_db"
+        "postgresql+asyncpg://user:password@localhost:5432/nko_db"
     )
-    
-    # Преобразуем URL для асинхронного драйвера
-    if database_url.startswith("postgresql://"):
-        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
     
     engine = create_async_engine(
         database_url,
