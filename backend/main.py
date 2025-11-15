@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import auth
 from config import settings
-from db import close_db, get_db, init_db
+from database import close_db, get_db, init_db
 from nko import NKOFilterRequest, NKOResponse, fetch_nko
 from s3 import router as s3_router
 
