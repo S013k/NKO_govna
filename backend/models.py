@@ -55,10 +55,10 @@ class EventsStates(str, Enum):
 class UserInDB(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String)
-    login = Column(String, unique=True, index=True)
-    hash = Column(String)
-    salt = Column(String)
+    full_name = Column(String(100), nullable=False)
+    login = Column(String(100), nullable=False, unique=True, index=True)
+    hash = Column(String(100), nullable=False)
+    salt = Column(String(10), nullable=False)
     role = Column(
         ENUM(UsersRoles, name="users_roles", create_type=False), nullable=False
     )
@@ -115,6 +115,7 @@ class EventInDB(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text)
     address = Column(Text)
+    city_id = Column(SmallInteger, ForeignKey("cities.id"), nullable=False)
     picture = Column(Text)
     coords = Column(Point)
     starts_at = Column(TIMESTAMP(timezone=True))
