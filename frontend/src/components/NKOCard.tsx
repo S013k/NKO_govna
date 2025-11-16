@@ -12,6 +12,9 @@ interface NKOCardProps {
 }
 
 export function NKOCard({ nko }: NKOCardProps) {
+  // DEBUG: Log logo data outside JSX
+  console.log('DEBUG: NKOCard - NKO ID:', nko.id, 'Logo field:', nko.logo, 'Name:', nko.name)
+  
   return (
     <Card className="bg-white border border-[var(--color-border)] rounded-xl p-6 hover-lift transition-all duration-300 h-full flex flex-col">
       <CardHeader className="p-0 pb-4">
@@ -19,7 +22,7 @@ export function NKOCard({ nko }: NKOCardProps) {
           <div className="w-16 h-16 bg-[var(--color-bg-secondary)] rounded-lg flex items-center justify-center flex-shrink-0">
             {nko.logo ? (
               <NKOLogo
-                logoId={nko.id.toString()}
+                logoData={nko.logo}
                 width={64}
                 height={64}
                 className="w-12 h-12 object-contain"

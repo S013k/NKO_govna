@@ -1,10 +1,11 @@
 'use client'
 
-import { S3Image } from '@/components/S3Image'
 import { getNKOLogoUrlWithFallback } from '@/lib/logos'
+import { S3Image } from '@/components/S3Image'
 
 interface NKOLogoProps {
-  logoId: string
+  logoData?: string  // Actual logo data from database (S3 path or external URL)
+  logoId?: string    // Legacy logoId for backward compatibility
   width?: number
   height?: number
   className?: string
@@ -14,9 +15,10 @@ interface NKOLogoProps {
 }
 
 /**
- * Компонент для отображения логотипа НКО из S3 хранилища
+ * Компонент для отображения логотипа НКО из статических изображений или S3
  */
 export function NKOLogo({
+  logoData,
   logoId,
   width = 60,
   height = 60,
@@ -25,8 +27,13 @@ export function NKOLogo({
   fallback,
   priority = false
 }: NKOLogoProps) {
-  const logoUrl = getNKOLogoUrlWithFallback(logoId, fallback)
-  const logoAlt = alt || `Логотип НКО ${logoId}`
+  // Используем logoData если доступно, иначе fallback на logoId для обратной совместимости
+  const logoUrl = logoData
+    ? getNKOLogoUrlWithFallback(logoData, fallback)
+    : getNKOLogoUrlWithFallback(logoId || '', fallback)
+  
+  const logoAlt = alt || `Логотип НКО ${logoId || 'unknown'}`
+  
 
   return (
     <S3Image

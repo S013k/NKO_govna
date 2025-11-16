@@ -145,7 +145,7 @@ export default function NKODetailPage() {
               <div className="w-32 h-32 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                 {nko.logo ? (
                   <NKOLogo
-                    logoId={nko.id.toString()}
+                    logoData={nko.logo}
                     width={128}
                     height={128}
                     className="w-24 h-24 object-contain"

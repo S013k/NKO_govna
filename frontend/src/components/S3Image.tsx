@@ -29,10 +29,15 @@ export function S3Image({
   const [imgSrc, setImgSrc] = useState(src)
   const [hasError, setHasError] = useState(false)
 
+  // DEBUG: Log S3Image initialization
+  console.log('DEBUG: S3Image - initial src:', src, 'fallback:', fallback)
+
   const handleError = () => {
+    console.log('DEBUG: S3Image - handleError called, hasError:', hasError, 'fallback:', fallback)
     if (!hasError && fallback) {
       setImgSrc(fallback)
       setHasError(true)
+      console.log('DEBUG: S3Image - switched to fallback:', fallback)
     }
   }
 
