@@ -1,17 +1,17 @@
 -- Заполнение таблицы users
-INSERT INTO users (hash, salt, full_name, login, role) VALUES
-('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'a1B2c3D4e5', 'Иванов Иван Иванович', 'ivanov', 'admin'),
-('9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 'f6G7h8J9k0', 'Петров Петр Петрович', 'petrov', 'moder'),
-('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'L1m2N3o4P5', 'Сидорова Анна Сергеевна', 'sidorova', 'user'),
-('2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae', 'q6R7s8T9u0', 'Кузнецов Дмитрий Олегович', 'kuznetsov', 'user'),
-('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', 'V1w2X3y4Z5', 'Фонд Добро', 'fond_dobro', 'nko'),
-('fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210', 'b6C7d8E9f0', 'Ассоциация Надежда', 'nadezhda', 'nko'),
-('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'G1h2I3j4K5', 'Васильев Артем Андреевич', 'vasiliev', 'user'),
-('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'l6M7n8O9p0', 'Морозова Мария Павловна', 'morozova', 'moder'),
-('cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'Q1r2S3t4U5', 'Алексеева Екатерина Игоревна', 'alekseeva', 'user'),
-('dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd', 'v6W7x8Y9z0', 'Смирнов Сергей Николаевич', 'smirnov', 'user'),
-('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', 'A1b2C3d4E5', 'АНО Помощь', 'pomoshch', 'nko'),
-('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 'F6g7H8i9J0', 'Тарасов Илья Андреевич', 'tarasov', 'user');
+INSERT INTO users (hash, salt, full_name, login, role, user_pic) VALUES
+('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'a1B2c3D4e5', 'Иванов Иван Иванович', 'ivanov', 'admin', 'userpic/8476b1d0b0c67a4f6fe0afc152851068.jpeg'),
+('9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 'f6G7h8J9k0', 'Петров Петр Петрович', 'petrov', 'moder', 'userpic/8476b1d0b0c67a4f6fe0afc152851068.jpeg'),
+('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'L1m2N3o4P5', 'Сидорова Анна Сергеевна', 'sidorova', 'user', 'userpic/8476b1d0b0c67a4f6fe0afc152851068.jpeg'),
+('2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae', 'q6R7s8T9u0', 'Кузнецов Дмитрий Олегович', 'kuznetsov', 'user', 'userpic/8476b1d0b0c67a4f6fe0afc152851068.jpeg'),
+('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', 'V1w2X3y4Z5', 'Фонд Добро', 'fond_dobro', 'nko', 'userpic/550e8400-e29b-41d4-a716-446655440005'),
+('fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210', 'b6C7d8E9f0', 'Ассоциация Надежда', 'nadezhda', 'nko', 'userpic/550e8400-e29b-41d4-a716-446655440006'),
+('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'G1h2I3j4K5', 'Васильев Артем Андреевич', 'vasiliev', 'user', 'userpic/550e8400-e29b-41d4-a716-446655440007'),
+('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'l6M7n8O9p0', 'Морозова Мария Павловна', 'morozova', 'moder', 'userpic/550e8400-e29b-41d4-a716-446655440008'),
+('cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'Q1r2S3t4U5', 'Алексеева Екатерина Игоревна', 'alekseeva', 'user', 'userpic/550e8400-e29b-41d4-a716-446655440009'),
+('dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd', 'v6W7x8Y9z0', 'Смирнов Сергей Николаевич', 'smirnov', 'user', 'userpic/550e8400-e29b-41d4-a716-446655440010'),
+('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', 'A1b2C3d4E5', 'АНО Помощь', 'pomoshch', 'nko', 'userpic/550e8400-e29b-41d4-a716-446655440011'),
+('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 'F6g7H8i9J0', 'Тарасов Илья Андреевич', 'tarasov', 'user', 'userpic/550e8400-e29b-41d4-a716-446655440012');
 
 -- Заполнение таблицы nko_categories
 INSERT INTO nko_categories (name, created_at) VALUES
@@ -34,11 +34,11 @@ INSERT INTO cities (name) VALUES
 
 -- Заполнение таблицы nko
 INSERT INTO nko (name, description, logo, address, city_id, coords, meta, created_at) VALUES
-('Благотворительный фонд «Подари жизнь»', 'Помощь детям с онкологическими и гематологическими заболеваниями. Фонд собирает средства на лечение, закупает медицинское оборудование и лекарства.', 'https://podari-zhizn.ru/logo.png', 'г. Москва, ул. Доватора, д. 13', 2, POINT(37.5665, 55.7522), '{"url": "https://podari-zhizn.ru"}', '2024-01-20 12:00:00+03'),
-('Благотворительный фонд «Русфонд»', 'Адресная помощь тяжелобольным детям и взрослым. Работает в Москве и 16 регионах России, развивает Национальный регистр доноров костного мозга.', 'https://rusfond.ru/logo.png', 'г. Москва, ул. Петровка, д. 26, стр. 2', 2, POINT(37.6156, 55.7658), '{"url": "https://rusfond.ru"}', '2024-01-20 12:00:00+03'),
-('Благотворительный фонд помощи хосписам «Вера»', 'Поддержка московских и региональных хосписов, помощь людям с тяжелыми заболеваниями, обучение медицинского персонала паллиативной помощи.', 'https://vera.ru/logo.png', 'г. Москва, ул. Трубная, д. 12', 2, POINT(37.6214, 55.7658), '{"url": "https://vera.ru"}', '2024-01-20 12:00:00+03'),
-('Благотворительный фонд «Старость в радость»', 'Помощь одиноким пожилым людям в домах престарелых и интернатах. Более 20 000 волонтеров организуют мероприятия и поездки для пожилых людей.', 'https://starikam.ru/logo.png', 'г. Москва, ул. Маросейка, д. 9/2', 2, POINT(37.6389, 55.7578), '{"url": "https://starikam.ru"}', '2024-01-20 12:00:00+03'),
-('Фонд «Волонтеры в помощь детям-сиротам»', 'Поддержка детей в сиротских учреждениях, помощь кровным и приемным семьям, работа над изменением законодательства в области защиты детей.', 'https://otkazniki.ru/logo.png', 'г. Москва, Лучников пер., д. 2', 2, POINT(37.6342, 55.7611), '{"url": "https://otkazniki.ru"}', '2024-01-20 12:00:00+03'),
+('Благотворительный фонд «Подари жизнь»', 'Помощь детям с онкологическими и гематологическими заболеваниями. Фонд собирает средства на лечение, закупает медицинское оборудование и лекарства.', 'nko-logo/8476b1d0b0c67a4f6fe0afc152851068.jpeg', 'г. Москва, ул. Доватора, д. 13', 2, POINT(37.5665, 55.7522), '{"url": "https://podari-zhizn.ru"}', '2024-01-20 12:00:00+03'),
+('Благотворительный фонд «Русфонд»', 'Адресная помощь тяжелобольным детям и взрослым. Работает в Москве и 16 регионах России, развивает Национальный регистр доноров костного мозга.', 'nko-logo/8476b1d0b0c67a4f6fe0afc152851068.jpeg', 'г. Москва, ул. Петровка, д. 26, стр. 2', 2, POINT(37.6156, 55.7658), '{"url": "https://rusfond.ru"}', '2024-01-20 12:00:00+03'),
+('Благотворительный фонд помощи хосписам «Вера»', 'Поддержка московских и региональных хосписов, помощь людям с тяжелыми заболеваниями, обучение медицинского персонала паллиативной помощи.', 'nko-logo/8476b1d0b0c67a4f6fe0afc152851068.jpeg', 'г. Москва, ул. Трубная, д. 12', 2, POINT(37.6214, 55.7658), '{"url": "https://vera.ru"}', '2024-01-20 12:00:00+03'),
+('Благотворительный фонд «Старость в радость»', 'Помощь одиноким пожилым людям в домах престарелых и интернатах. Более 20 000 волонтеров организуют мероприятия и поездки для пожилых людей.', 'nko-logo/8476b1d0b0c67a4f6fe0afc152851068.jpeg', 'г. Москва, ул. Маросейка, д. 9/2', 2, POINT(37.6389, 55.7578), '{"url": "https://starikam.ru"}', '2024-01-20 12:00:00+03'),
+('Фонд «Волонтеры в помощь детям-сиротам»', 'Поддержка детей в сиротских учреждениях, помощь кровным и приемным семьям, работа над изменением законодательства в области защиты детей.', 'nko-logo/8476b1d0b0c67a4f6fe0afc152851068.jpeg', 'г. Москва, Лучников пер., д. 2', 2, POINT(37.6342, 55.7611), '{"url": "https://otkazniki.ru"}', '2024-01-20 12:00:00+03'),
 ('Благотворительный фонд «Второе дыхание»', 'Крупнейшая НКО по сбору, сортировке и переработке одежды. Продвигает идею осознанного потребления и сокращения объема мусора.', 'https://secondbreath.ru/logo.png', 'г. Москва, Чистопрудный бульвар, д. 12А', 2, POINT(37.6456, 55.7656), '{"url": "https://secondbreath.ru"}', '2024-01-20 12:00:00+03'),
 ('Фонд «Я свободен»', 'Помощь муниципальным и частным приютам для животных, организация стерилизации бездомных животных, поиск хозяев для животных из приютов.', 'https://yasvoboden.ru/logo.png', 'г. Москва, Волгоградский пр-кт, д. 3-5, стр. 2', 2, POINT(37.6789, 55.7342), '{"url": "https://yasvoboden.ru"}', '2024-01-20 12:00:00+03'),
 ('АНО «Центр социальных инициатив Добра и Успеха»', 'Реализация социальных проектов для поддержки социально незащищенных слоев населения, образовательные программы и культурные инициативы.', 'https://dobro-uspeh.ru/logo.png', 'г. Москва, ул. Кржижановского, д. 13, корп. 1', 2, POINT(37.5678, 55.6543), '{"url": "https://dobro-uspeh.ru"}', '2024-01-20 12:00:00+03'),
