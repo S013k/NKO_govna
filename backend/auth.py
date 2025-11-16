@@ -15,6 +15,7 @@ class UserCreate(BaseModel):
     login: str
     password: str
     role: UsersRoles
+    user_pic: Optional[str] = None
 
 
 class User(BaseModel):
@@ -22,6 +23,7 @@ class User(BaseModel):
     full_name: str
     login: str
     role: UsersRoles
+    user_pic: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -55,6 +57,7 @@ def register_user(user: UserCreate, db: Session):
         role=user.role,
         hash=hashed_password,
         salt=salt,
+        user_pic=user.user_pic,
     )
     db.add(db_user)
     db.commit()

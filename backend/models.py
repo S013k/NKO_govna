@@ -62,6 +62,7 @@ class UserInDB(Base):
     role = Column(
         ENUM(UsersRoles, name="users_roles", create_type=False), nullable=False
     )
+    user_pic = Column(String)
 
 class NKOCategoryInDB(Base):
     __tablename__ = "nko_categories"

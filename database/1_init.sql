@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS users (
     salt VARCHAR(10) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     login VARCHAR(100) NOT NULL,
-    role users_roles NOT NULL
+    role users_roles NOT NULL,
+    user_pic VARCHAR
 );
 
 -- Связующая таблица для НКО и их пользователей (представителей)
