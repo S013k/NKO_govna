@@ -25,10 +25,28 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "8080:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin/servers.template.json:/tmp/servers.template.json:ro
+      - ./pgadmin/setup.py:/tmp/setup.py:ro
     depends_on:
       - pg-cora
+    user: root
+    entrypoint: >
+      /bin/sh -c "
+      python3 /tmp/setup.py &&
+      cat /tmp/servers.json > /pgadmin4/servers.json &&
+      mkdir -p /var/lib/pgadmin/storage/pgadmin &&
+      cat /tmp/pgpassfile > /var/lib/pgadmin/storage/pgadmin/pgpassfile &&
+      chmod 600 /var/lib/pgadmin/storage/pgadmin/pgpassfile &&
+      chown -R 5050:5050 /var/lib/pgadmin /pgadmin4 &&
+      /entrypoint.sh
+      "
     networks:
       - cora-network
 
@@ -125,3 +143,6 @@ services:
 networks:
   cora-network:
     driver: bridge
+
+volumes:
+  pgadmin-data:

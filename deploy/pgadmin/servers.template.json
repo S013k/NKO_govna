@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Docker PostgreSQL",
+            "Group": "Servers",
+            "Host": "pg-cora",
+            "Port": 5432,
+            "MaintenanceDB": "postgres",
+            "Username": "${POSTGRES_USER}",
+            "SSLMode": "prefer",
+            "PassFile": "/tmp/pgpassfile"
+        }
+    }
+}
