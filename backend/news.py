@@ -9,7 +9,7 @@ from models import NewsInDB, CityInDB, UserInDB
 
 
 class NewsFilterRequest(BaseModel):
-    jwt_token: str
+    jwt_token: str = ""  # Может быть пустой строкой, обязателен только для favorite
     city: Optional[str] = None
     favorite: Optional[bool] = None
     regex: Optional[str] = None
@@ -49,9 +49,6 @@ def fetch_news(filters: NewsFilterRequest, db: Session) -> List[NewsResponse]:
     Returns:
         Список новостей
     """
-    # Получаем текущего пользователя
-    current_user = get_current_user(filters.jwt_token, db)
-    
     # Базовый запрос
     query = db.query(NewsInDB)
     
@@ -62,17 +59,25 @@ def fetch_news(filters: NewsFilterRequest, db: Session) -> List[NewsResponse]:
             query = query.filter(NewsInDB.city_id == city.id)
     
     # Фильтр по избранным
-    if filters.favorite:
+    if filters.favorite and filters.jwt_token:
         from models import FavoriteNewsInDB
-        favorite_news_ids = db.query(FavoriteNewsInDB.news_id).filter(
-            FavoriteNewsInDB.user_id == current_user.id
-        ).all()
-        favorite_news_ids = [id[0] for id in favorite_news_ids]
-        if favorite_news_ids:
-            query = query.filter(NewsInDB.id.in_(favorite_news_ids))
-        else:
-            # Если нет избранных, возвращаем пустой список
-            return []
+        from auth import jwt_decode
+        try:
+            payload = jwt_decode(filters.jwt_token)
+            user_id = payload.get("id")
+            if user_id:
+                favorite_news_ids = db.query(FavoriteNewsInDB.news_id).filter(
+                    FavoriteNewsInDB.user_id == user_id
+                ).all()
+                favorite_news_ids = [id[0] for id in favorite_news_ids]
+                if favorite_news_ids:
+                    query = query.filter(NewsInDB.id.in_(favorite_news_ids))
+                else:
+                    # Если нет избранных, возвращаем пустой список
+                    return []
+        except Exception:
+            # Если токен невалидный, просто игнорируем фильтр
+            pass
     
     # Фильтр по регулярному выражению
     if filters.regex:
