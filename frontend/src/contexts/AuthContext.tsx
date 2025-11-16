@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const tokenResponse = await apiClient.login(username, password)
       console.log('DEBUG: Login successful, token received:', tokenResponse.access_token ? 'yes' : 'no')
       
-      // Сохраняем токен в cookie
+      // Сохраняем access token в cookie (refresh token сохраняется в apiClient.login)
       cookies.setAccessToken(tokenResponse.access_token)
       console.log('DEBUG: Token saved to cookie')
       

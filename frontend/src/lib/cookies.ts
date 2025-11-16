@@ -96,6 +96,29 @@ export class CookieManager {
   static removeAccessToken(): void {
     this.delete('access_token', { path: '/' })
   }
+  
+  // Установка refresh токена
+  static setRefreshToken(token: string): void {
+    const isProduction = process.env.NODE_ENV === 'production'
+    
+    this.set('refresh_token', token, {
+      maxAge: 7 * 24 * 60 * 60, // 7 дней
+      path: '/',
+      secure: isProduction,
+      httpOnly: false, // Должно быть false для доступа из JavaScript
+      sameSite: 'lax',
+    })
+  }
+
+  // Получение refresh токена
+  static getRefreshToken(): string | null {
+    return this.get('refresh_token')
+  }
+
+  // Удаление refresh токена
+  static removeRefreshToken(): void {
+    this.delete('refresh_token', { path: '/' })
+  }
 
   // Установка информации о пользователе (не чувствительные данные)
   static setUserInfo(user: { id: number; full_name: string; login: string; role: string }): void {
@@ -127,6 +150,7 @@ export class CookieManager {
   // Очистка всех авторизационных cookie
   static clearAuthCookies(): void {
     this.removeAccessToken()
+    this.removeRefreshToken()
     this.removeUserInfo()
   }
 

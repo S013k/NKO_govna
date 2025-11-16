@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from auth import (
     User, UserCreate, Token, oauth2_scheme,
     register_user, login_for_access_token,
-    get_current_user, read_users_me
+    get_current_user, read_users_me, refresh_access_token, RefreshTokenRequest
 )
 from config import settings
 from database import close_db, get_db, init_db
@@ -195,6 +195,12 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Вход пользователя и получение токена"""
     return login_for_access_token(form_data, db)
+
+
+@app.post("/auth/refresh", response_model=Token, tags=["Authentication"])
+def refresh_token(token_request: RefreshTokenRequest, db: Session = Depends(get_db)):
+    """Обновление access token с помощью refresh token"""
+    return refresh_access_token(token_request.refresh_token, db)
 
 
 @app.post("/nko", response_model=NKOResponse, status_code=status.HTTP_201_CREATED)

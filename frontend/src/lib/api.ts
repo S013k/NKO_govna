@@ -25,6 +25,7 @@ export interface User {
 
 export interface TokenResponse {
   access_token: string
+  refresh_token: string
   token_type: string
 }
 
@@ -83,11 +84,25 @@ class ApiClient {
     let response = await fetch(url, { ...defaultOptions, ...options })
 
     // Если получили 401, пробуем обновить токен
-    if (response.status === 401 && !endpoint.includes('/auth/login')) {
+    if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/refresh')) {
       try {
-        await this.refreshToken()
-        // Повторяем оригинальный запрос
-        response = await fetch(url, { ...defaultOptions, ...options })
+        const refreshResult = await this.refreshToken()
+        if (refreshResult) {
+          // Повторяем оригинальный запрос с новым токеном
+          const newHeaders = { ...headers };
+          newHeaders['Authorization'] = `Bearer ${cookies.getAccessToken()}`;
+          
+          const newOptions = { ...options };
+          if (newOptions.headers) {
+            newOptions.headers = { ...newOptions.headers, ...newHeaders };
+          } else {
+            newOptions.headers = newHeaders;
+          }
+          
+          response = await fetch(url, { ...defaultOptions, ...newOptions })
+        } else {
+          throw new Error('Не удалось обновить токен')
+        }
       } catch (refreshError) {
         // Если не удалось обновить токен, пробрасываем ошибку
         throw new ApiError('Сессия истекла', 401, 'TOKEN_EXPIRED')
@@ -123,30 +138,48 @@ class ApiClient {
     return response.json()
   }
 
-  private async refreshToken(): Promise<void> {
-    // Для обновления токена можно использовать специальный эндпоинт
-    // или просто проверить текущий статус через /users/me
+  private async refreshToken(): Promise<boolean> {
     console.log('DEBUG: refreshToken called')
     
-    const token = cookies.getAccessToken()
-    console.log('DEBUG: Token from cookies:', token ? 'exists' : 'missing')
+    // Получаем refresh token из cookies
+    const refreshToken = cookies.getRefreshToken()
+    console.log('DEBUG: Refresh token from cookies:', refreshToken ? 'exists' : 'missing')
     
-    const headers: Record<string, string> = {}
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
+    if (!refreshToken) {
+      console.log('DEBUG: No refresh token found')
+      return false
     }
     
-    console.log('DEBUG: Headers for /users/me/:', headers)
-    
-    const response = await fetch(`${this.baseURL}/users/me/`, {
-      credentials: 'include',
-      headers,
-    })
-
-    console.log('DEBUG: /users/me/ response status:', response.status)
-
-    if (!response.ok) {
-      throw new Error('Не удалось обновить токен')
+    try {
+      // Отправляем запрос на обновление токена
+      const response = await fetch(`${this.baseURL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+        credentials: 'include',
+      })
+      
+      console.log('DEBUG: /auth/refresh response status:', response.status)
+      
+      if (!response.ok) {
+        console.log('DEBUG: Failed to refresh token')
+        return false
+      }
+      
+      // Получаем новые токены
+      const tokenData: TokenResponse = await response.json()
+      
+      // Сохраняем новые токены в cookies
+      cookies.setAccessToken(tokenData.access_token)
+      cookies.setRefreshToken(tokenData.refresh_token)
+      
+      console.log('DEBUG: Token refreshed successfully')
+      return true
+    } catch (error) {
+      console.error('DEBUG: Error refreshing token:', error)
+      return false
     }
   }
 
@@ -156,11 +189,18 @@ class ApiClient {
     formData.append('username', login)
     formData.append('password', password)
 
-    return this.request<TokenResponse>('/auth/login', {
+    const response = await this.request<TokenResponse>('/auth/login', {
       method: 'POST',
       body: formData,
       headers: {}, // Не устанавливаем Content-Type для FormData
     })
+    
+    // Сохраняем refresh token в cookies
+    if (response.refresh_token) {
+      cookies.setRefreshToken(response.refresh_token)
+    }
+    
+    return response
   }
 
   async register(data: RegisterRequest): Promise<User> {
