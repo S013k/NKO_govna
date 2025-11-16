@@ -25,6 +25,11 @@ from event import (
     fetch_events, fetch_event_by_id, create_event, delete_event,
     add_event_to_favorites, remove_event_from_favorites, get_favorite_events
 )
+from news import (
+    NewsFilterRequest, NewsCreateRequest, NewsResponse,
+    fetch_news, fetch_news_by_id, create_news, delete_news,
+    add_news_to_favorites, remove_news_from_favorites, get_favorite_news
+)
 from s3 import router as s3_router
 
 
@@ -98,7 +103,7 @@ async def health_check():
 
 @app.get("/nko", response_model=List[NKOResponse])
 def get_nko(
-    jwt_token: str,
+    jwt_token: str = "",
     city: Optional[str] = None,
     favorite: Optional[bool] = None,
     category: Optional[List[str]] = Query(None),
@@ -109,9 +114,9 @@ def get_nko(
     Получение списка НКО с фильтрацией
 
     Args:
-        jwt_token: JWT токен пользователя
+        jwt_token: JWT токен пользователя (может быть пустой строкой, обязателен только для favorite)
         city: Фильтр по городу (опционально)
-        favorite: Фильтр по избранным (опционально)
+        favorite: Фильтр по избранным (опционально, требует jwt_token)
         category: Фильтр по категориям (опционально, можно передать несколько раз)
         regex: Регулярное выражение для поиска (опционально)
         db: Сессия базы данных
@@ -120,7 +125,8 @@ def get_nko(
         Список НКО с их категориями
     
     Example:
-        GET /nko?jwt_token=test&category=Помощь детям&category=Образование
+        GET /nko?jwt_token=&category=Помощь детям&category=Образование
+        GET /nko?jwt_token=TOKEN&favorite=true
     """
     filters = NKOFilterRequest(
         jwt_token=jwt_token,
@@ -230,7 +236,7 @@ def get_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
 
 @app.get("/event", response_model=List[EventResponse], tags=["Events"])
 def get_events(
-    jwt_token: str,
+    jwt_token: str = "",
     nko_id: Optional[List[int]] = Query(None),
     favorite: Optional[bool] = None,
     category: Optional[List[str]] = Query(None),
@@ -243,9 +249,9 @@ def get_events(
     Получение списка событий с фильтрацией
 
     Args:
-        jwt_token: JWT токен пользователя
+        jwt_token: JWT токен пользователя (может быть пустой строкой, обязателен только для favorite)
         nko_id: Фильтр по НКО (опционально, можно передать несколько раз)
-        favorite: Фильтр по избранным (опционально, заглушка)
+        favorite: Фильтр по избранным (опционально, требует jwt_token)
         category: Фильтр по категориям (опционально, можно передать несколько раз)
         regex: Регулярное выражение для поиска (опционально)
         time_from: Фильтр по времени начала события (ISO format, опционально)
@@ -256,7 +262,8 @@ def get_events(
         Список событий с их категориями
     
     Example:
-        GET /event?jwt_token=test&nko_id=1&nko_id=2&category=Спорт&time_from=2024-01-01T00:00:00
+        GET /event?jwt_token=&nko_id=1&nko_id=2&category=Спорт&time_from=2024-01-01T00:00:00
+        GET /event?jwt_token=TOKEN&favorite=true
     """
     filters = EventFilterRequest(
         jwt_token=jwt_token,
@@ -358,6 +365,107 @@ def remove_event_favorite(
     current_user = get_current_user(token, db)
     return remove_event_from_favorites(current_user.id, event_id, db)
 
+
+# News endpoints
+@app.get("/news", response_model=List[NewsResponse], tags=["News"])
+def get_news_list(
+    jwt_token: str = "",
+    city: Optional[str] = None,
+    favorite: Optional[bool] = None,
+    regex: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Получение списка новостей с фильтрацией
+
+    Args:
+        jwt_token: JWT токен пользователя (может быть пустой строкой, обязателен только для favorite)
+        city: Фильтр по городу (опционально)
+        favorite: Фильтр по избранным (опционально, требует jwt_token)
+        regex: Регулярное выражение для поиска (опционально)
+        db: Сессия базы данных
+
+    Returns:
+        Список новостей
+    
+    Example:
+        GET /news?jwt_token=&city=Москва
+        GET /news?jwt_token=TOKEN&favorite=true
+    """
+    filters = NewsFilterRequest(
+        jwt_token=jwt_token,
+        city=city,
+        favorite=favorite,
+        regex=regex
+    )
+    return fetch_news(filters, db)
+
+
+@app.get("/news/{news_id}", response_model=NewsResponse, tags=["News"])
+def get_news_by_id(news_id: int, db: Session = Depends(get_db)):
+    """
+    Получение конкретной новости по ID
+
+    Args:
+        news_id: ID новости
+        db: Сессия базы данных
+
+    Returns:
+        Данные новости
+    """
+    return fetch_news_by_id(news_id, db)
+
+
+@app.post("/news", response_model=NewsResponse, status_code=status.HTTP_201_CREATED, tags=["News"])
+def add_news(news_data: NewsCreateRequest, db: Session = Depends(get_db)):
+    """
+    Создание новой новости
+
+    Args:
+        news_data: Данные для создания новости
+        db: Сессия базы данных
+
+    Returns:
+        Созданная новость
+    """
+    return create_news(news_data, db)
+
+
+@app.delete("/news/{news_id}", status_code=status.HTTP_200_OK, tags=["News"])
+def remove_news(news_id: int, db: Session = Depends(get_db)):
+    """
+    Удаление новости по ID
+
+    Args:
+        news_id: ID новости для удаления
+        db: Сессия базы данных
+
+    Returns:
+        Сообщение об успешном удалении
+    """
+    return delete_news(news_id, db)
+
+
+@app.post("/news/{news_id}/favorite", tags=["Favorites"])
+def add_news_favorite(
+    news_id: int,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """Добавление новости в избранное"""
+    current_user = get_current_user(token, db)
+    return add_news_to_favorites(current_user.id, news_id, db)
+
+
+@app.delete("/news/{news_id}/favorite", tags=["Favorites"])
+def remove_news_favorite(
+    news_id: int,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """Удаление новости из избранного"""
+    current_user = get_current_user(token, db)
+    return remove_news_from_favorites(current_user.id, news_id, db)
 
 
 if __name__ == "__main__":

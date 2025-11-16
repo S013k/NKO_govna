@@ -97,6 +97,11 @@ def read_users_me(current_user: User):
     return current_user
 
 def jwt_decode(token: str):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         return jwt.decode(
             token, security.SECRET_KEY, algorithms=[security.ALGORITHM]

@@ -148,3 +148,16 @@ class FavoriteNKOInDB(Base):
     user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     nko_id = Column(BigInteger, ForeignKey("nko.id", ondelete="CASCADE"), primary_key=True)
 
+
+class NewsInDB(Base):
+    __tablename__ = "news"
+    id = Column(BigInteger, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    image = Column(Text)
+    city_id = Column(SmallInteger, ForeignKey("cities.id"))
+    created_by = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    approved_by = Column(BigInteger, ForeignKey("users.id"))
+    meta = Column(Text)
+    created_at = Column(TIMESTAMP(timezone=True), server_default="now()")
+

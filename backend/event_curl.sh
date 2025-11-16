@@ -1,50 +1,45 @@
 #!/bin/bash
 
-# Получение всех событий
+# Получение всех событий (с пустым токеном)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token"
+  --data-urlencode "jwt_token="
 
-# Получение событий с фильтром по одному НКО
+# Получение событий с фильтром по одному НКО (с пустым токеном)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "jwt_token=" \
   --data-urlencode "nko_id=1"
 
-# Получение событий с фильтром по нескольким НКО
+# Получение событий с фильтром по нескольким НКО (с пустым токеном)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "jwt_token=" \
   --data-urlencode "nko_id=1" \
   --data-urlencode "nko_id=2"
 
-# Получение событий с фильтром по категории
+# Получение событий с фильтром по категории (с пустым токеном)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "jwt_token=" \
   --data-urlencode "category=Спорт"
 
-# Получение событий с фильтром по нескольким категориям
+# Получение событий с фильтром по нескольким категориям (с пустым токеном)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "jwt_token=" \
   --data-urlencode "category=Спорт" \
   --data-urlencode "category=Культура"
 
-# Получение событий с фильтром по временному диапазону
+# Получение событий с фильтром по временному диапазону (с пустым токеном)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "jwt_token=" \
   --data-urlencode "time_from=2024-01-01T00:00:00" \
   --data-urlencode "time_to=2024-12-31T23:59:59"
 
-# Получение событий с regex поиском
+# Получение событий с regex поиском (с пустым токеном)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "jwt_token=" \
   --data-urlencode "regex=концерт"
 
-# Получение событий с фильтром по избранным (заглушка)
+# Комбинированный фильтр: НКО + категория + время (с пустым токеном)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
-  --data-urlencode "favorite=true"
-
-# Комбинированный фильтр: НКО + категория + время
-curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
+  --data-urlencode "jwt_token=" \
   --data-urlencode "nko_id=1" \
   --data-urlencode "category=Спорт" \
   --data-urlencode "time_from=2024-06-01T00:00:00"

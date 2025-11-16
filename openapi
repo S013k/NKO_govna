@@ -530,16 +530,145 @@ paths:
           description: Ошибка базы данных
 
 
+  /news/{news_id}:
+    get:
+      tags: [Новости]
+      summary: Получить новость по ID
+      parameters:
+        - name: news_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные новости
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsResponse'
+        '404':
+          description: Новость не найдена
+        '500':
+          description: Ошибка базы данных
+    delete:
+      tags: [Новости]
+      summary: Удалить новость по ID
+      parameters:
+        - name: news_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Новость успешно удалена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Новость с ID 1 успешно удалена"
+        '404':
+          description: Новость не найдена
+        '500':
+          description: Ошибка базы данных
+
+  /news/{news_id}/favorite:
+    post:
+      tags: [Избранное]
+      summary: Добавить новость в избранное
+      description: Добавление новости в список избранных для текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: news_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID новости для добавления в избранное
+      responses:
+        '200':
+          description: Новость успешно добавлена в избранное
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Новость с ID 1 добавлена в избранное"
+        '400':
+          description: Новость уже в избранном
+        '404':
+          description: Новость не найдена
+        '401':
+          description: Пользователь не авторизован
+        '500':
+          description: Ошибка базы данных
+    delete:
+      tags: [Избранное]
+      summary: Удалить новость из избранного
+      description: Удаление новости из списка избранных для текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: news_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID новости для удаления из избранного
+      responses:
+        '200':
+          description: Новость успешно удалена из избранного
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Новость с ID 1 удалена из избранного"
+        '404':
+          description: Новость не найдена в избранном
+        '401':
+          description: Пользователь не авторизован
+        '500':
+          description: Ошибка базы данных
+
   /news:
     get:
       tags: [Публичные данные]
       summary: Получить ленту новостей
       parameters:
-        - name: city_id
+        - name: jwt_token
           in: query
+          required: false
           schema:
-            type: integer
-          description: ID города для фильтрации (если не указан, возвращаются общие новости)
+            type: string
+          description: JWT токен пользователя (может быть пустой строкой, обязателен только для favorite)
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Название города для фильтрации
+        - name: favorite
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Фильтр по избранным новостям
+        - name: regex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Регулярное выражение для поиска в названии
       responses:
         '200':
           description: Список новостей
@@ -548,7 +677,25 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/News'
+                  $ref: '#/components/schemas/NewsResponse'
+    post:
+      tags: [Новости]
+      summary: Создать новость
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsCreateRequest'
+      responses:
+        '201':
+          description: Новость успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsResponse'
+        '500':
+          description: Ошибка базы данных
 
   /knowledge-base:
     get:
@@ -1098,39 +1245,86 @@ components:
           example: ["Спорт", "Культура"]
 
 
-    News:
+    NewsFilterRequest:
+      type: object
+      properties:
+        jwt_token:
+          type: string
+          description: JWT токен пользователя (может быть пустой строкой, обязателен только для favorite)
+        city:
+          type: string
+          nullable: true
+          description: Название города для фильтрации
+        favorite:
+          type: boolean
+          nullable: true
+          description: Фильтр по избранным новостям
+        regex:
+          type: string
+          nullable: true
+          description: Регулярное выражение для поиска в названии
+
+    NewsCreateRequest:
+      type: object
+      required:
+        - title
+        - description
+      properties:
+        title:
+          type: string
+          description: Заголовок новости
+        description:
+          type: string
+          description: Содержание новости
+        image:
+          type: string
+          nullable: true
+          description: URL изображения новости
+        city_id:
+          type: integer
+          nullable: true
+          description: ID города (null для общих новостей)
+        meta:
+          type: string
+          nullable: true
+          description: Дополнительные метаданные
+
+    NewsResponse:
       type: object
       properties:
         id:
           type: integer
+          description: ID новости
         title:
           type: string
-        content:
+          description: Заголовок новости
+        description:
           type: string
-        image_url:
+          description: Содержание новости
+        image:
           type: string
-          format: uri
-        publication_date:
+          nullable: true
+          description: URL изображения новости
+        city:
+          type: string
+          nullable: true
+          description: Название города
+        created_by:
+          type: string
+          nullable: true
+          description: Имя создателя новости
+        approved_by:
+          type: string
+          nullable: true
+          description: Имя модератора, одобрившего новость
+        meta:
+          type: string
+          nullable: true
+          description: Дополнительные метаданные
+        created_at:
           type: string
           format: date-time
-        city_id:
-          type: integer
-          nullable: true
-          description: "null для общих новостей"
-
-    NewsInput:
-      type: object
-      properties:
-        title:
-          type: string
-        content:
-          type: string
-        image_url:
-          type: string
-          format: uri
-        city_id:
-          type: integer
-          nullable: true
+          description: Дата создания новости
 
     KnowledgeBaseMaterial:
       type: object

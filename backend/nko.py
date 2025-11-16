@@ -17,7 +17,7 @@ from models import (
 class NKOFilterRequest(BaseModel):
     """Модель запроса для фильтрации НКО"""
 
-    jwt_token: str  # Пока просто строка
+    jwt_token: str = ""  # Может быть пустой строкой, обязателен только для favorite
     city: Optional[str] = None
     favorite: Optional[bool] = None
     category: Optional[List[str]] = None
