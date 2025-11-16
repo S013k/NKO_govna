@@ -1,50 +1,37 @@
 #!/bin/bash
 
-# Получение всех событий
-curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token"
+# Получение всех событий (БЕЗ токена)
+curl -G "http://localhost/api/event"
 
-# Получение событий с фильтром по одному НКО
+# Получение событий с фильтром по одному НКО (БЕЗ токена)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
   --data-urlencode "nko_id=1"
 
-# Получение событий с фильтром по нескольким НКО
+# Получение событий с фильтром по нескольким НКО (БЕЗ токена)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
   --data-urlencode "nko_id=1" \
   --data-urlencode "nko_id=2"
 
-# Получение событий с фильтром по категории
+# Получение событий с фильтром по категории (БЕЗ токена)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
   --data-urlencode "category=Спорт"
 
-# Получение событий с фильтром по нескольким категориям
+# Получение событий с фильтром по нескольким категориям (БЕЗ токена)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
   --data-urlencode "category=Спорт" \
   --data-urlencode "category=Культура"
 
-# Получение событий с фильтром по временному диапазону
+# Получение событий с фильтром по временному диапазону (БЕЗ токена)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
   --data-urlencode "time_from=2024-01-01T00:00:00" \
   --data-urlencode "time_to=2024-12-31T23:59:59"
 
-# Получение событий с regex поиском
+# Получение событий с regex поиском (БЕЗ токена)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
   --data-urlencode "regex=концерт"
 
-# Получение событий с фильтром по избранным (заглушка)
+# Комбинированный фильтр: НКО + категория + время (БЕЗ токена)
 curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
-  --data-urlencode "favorite=true"
-
-# Комбинированный фильтр: НКО + категория + время
-curl -G "http://localhost/api/event" \
-  --data-urlencode "jwt_token=test-token" \
   --data-urlencode "nko_id=1" \
   --data-urlencode "category=Спорт" \
   --data-urlencode "time_from=2024-06-01T00:00:00"

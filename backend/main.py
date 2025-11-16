@@ -103,7 +103,7 @@ async def health_check():
 
 @app.get("/nko", response_model=List[NKOResponse])
 def get_nko(
-    jwt_token: str,
+    jwt_token: Optional[str] = None,
     city: Optional[str] = None,
     favorite: Optional[bool] = None,
     category: Optional[List[str]] = Query(None),
@@ -114,9 +114,9 @@ def get_nko(
     Получение списка НКО с фильтрацией
 
     Args:
-        jwt_token: JWT токен пользователя
+        jwt_token: JWT токен пользователя (опционально, обязателен только для favorite)
         city: Фильтр по городу (опционально)
-        favorite: Фильтр по избранным (опционально)
+        favorite: Фильтр по избранным (опционально, требует jwt_token)
         category: Фильтр по категориям (опционально, можно передать несколько раз)
         regex: Регулярное выражение для поиска (опционально)
         db: Сессия базы данных
@@ -125,7 +125,8 @@ def get_nko(
         Список НКО с их категориями
     
     Example:
-        GET /nko?jwt_token=test&category=Помощь детям&category=Образование
+        GET /nko?category=Помощь детям&category=Образование
+        GET /nko?jwt_token=TOKEN&favorite=true
     """
     filters = NKOFilterRequest(
         jwt_token=jwt_token,
@@ -235,7 +236,7 @@ def get_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
 
 @app.get("/event", response_model=List[EventResponse], tags=["Events"])
 def get_events(
-    jwt_token: str,
+    jwt_token: Optional[str] = None,
     nko_id: Optional[List[int]] = Query(None),
     favorite: Optional[bool] = None,
     category: Optional[List[str]] = Query(None),
@@ -248,9 +249,9 @@ def get_events(
     Получение списка событий с фильтрацией
 
     Args:
-        jwt_token: JWT токен пользователя
+        jwt_token: JWT токен пользователя (опционально, обязателен только для favorite)
         nko_id: Фильтр по НКО (опционально, можно передать несколько раз)
-        favorite: Фильтр по избранным (опционально, заглушка)
+        favorite: Фильтр по избранным (опционально, требует jwt_token)
         category: Фильтр по категориям (опционально, можно передать несколько раз)
         regex: Регулярное выражение для поиска (опционально)
         time_from: Фильтр по времени начала события (ISO format, опционально)
@@ -261,7 +262,8 @@ def get_events(
         Список событий с их категориями
     
     Example:
-        GET /event?jwt_token=test&nko_id=1&nko_id=2&category=Спорт&time_from=2024-01-01T00:00:00
+        GET /event?nko_id=1&nko_id=2&category=Спорт&time_from=2024-01-01T00:00:00
+        GET /event?jwt_token=TOKEN&favorite=true
     """
     filters = EventFilterRequest(
         jwt_token=jwt_token,
@@ -367,7 +369,7 @@ def remove_event_favorite(
 # News endpoints
 @app.get("/news", response_model=List[NewsResponse], tags=["News"])
 def get_news_list(
-    jwt_token: str,
+    jwt_token: Optional[str] = None,
     city: Optional[str] = None,
     favorite: Optional[bool] = None,
     regex: Optional[str] = None,
@@ -377,9 +379,9 @@ def get_news_list(
     Получение списка новостей с фильтрацией
 
     Args:
-        jwt_token: JWT токен пользователя
+        jwt_token: JWT токен пользователя (опционально, обязателен только для favorite)
         city: Фильтр по городу (опционально)
-        favorite: Фильтр по избранным (опционально)
+        favorite: Фильтр по избранным (опционально, требует jwt_token)
         regex: Регулярное выражение для поиска (опционально)
         db: Сессия базы данных
 
@@ -387,7 +389,8 @@ def get_news_list(
         Список новостей
     
     Example:
-        GET /news?jwt_token=test&city=Москва
+        GET /news?city=Москва
+        GET /news?jwt_token=TOKEN&favorite=true
     """
     filters = NewsFilterRequest(
         jwt_token=jwt_token,
