@@ -139,6 +139,25 @@ services:
     networks:
       - cora-network
 
+  nko-mcp-server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.mcp
+    environment:
+      - BACKEND_URL=http://cora:8000
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    depends_on:
+      cora:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - cora-network
 
 networks:
   cora-network:
