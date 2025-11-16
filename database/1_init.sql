@@ -138,3 +138,19 @@ CREATE TABLE IF NOT EXISTS favorite_nko (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (nko_id) REFERENCES nko(id) ON DELETE CASCADE
 );
+
+-- Новости
+CREATE TABLE IF NOT EXISTS news (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    image TEXT,
+    city_id SMALLINT,
+    created_by BIGINT NOT NULL,
+    approved_by BIGINT,
+    meta TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    FOREIGN KEY (city_id) REFERENCES cities(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id)
+);
