@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS events (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     address TEXT,
+    city_id SMALLINT NOT NULL,
     picture TEXT,
     coords POINT,
     starts_at TIMESTAMPTZ,
@@ -99,6 +100,7 @@ CREATE TABLE IF NOT EXISTS events (
     meta TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
     FOREIGN KEY (nko_id) REFERENCES nko(id) ON DELETE CASCADE,
+    FOREIGN KEY (city_id) REFERENCES cities(id),
     FOREIGN KEY (approved_by) REFERENCES users(id),
     FOREIGN KEY (created_by) REFERENCES users(id)
 );
