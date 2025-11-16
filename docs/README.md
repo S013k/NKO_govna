@@ -64,7 +64,6 @@
 ```bash
 # Клонирование репозитория
 git clone <repository-url>
-cd NKO_govna
 
 # Установка зависимостей фронтенда
 cd frontend
