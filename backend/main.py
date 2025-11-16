@@ -19,7 +19,7 @@ from nko import (
     fetch_nko, fetch_nko_by_id, create_nko, delete_nko,
     add_nko_to_favorites, remove_nko_from_favorites, get_favorite_nko
 )
-from city import CityCreateRequest, CityResponse, create_city, delete_city, fetch_cities, fetch_city_by_id
+from city import CityCreateRequest, CityResponse, create_city, delete_city, fetch_cities, fetch_city_by_name
 from event import (
     EventFilterRequest, EventCreateRequest, EventResponse,
     fetch_events, fetch_event_by_id, create_event, delete_event,
@@ -154,12 +154,12 @@ def add_city(city_data: CityCreateRequest, db: Session = Depends(get_db)):
     return create_city(city_data, db)
 
 
-@app.get("/city/{city_id}", response_model=CityResponse, tags=["City"])
-def get_city_by_id(city_id: int, db: Session = Depends(get_db)):
+@app.get("/city/{city_name}", response_model=CityResponse, tags=["City"])
+def get_city_by_name(city_name: str, db: Session = Depends(get_db)):
     """
-    Получение города по ID
+    Получение города по имени
     """
-    return fetch_city_by_id(city_id, db)
+    return fetch_city_by_name(city_name, db)
 
 
 @app.delete("/city/{city_id}", response_model=Dict[str, str], tags=["City"])
@@ -238,6 +238,7 @@ def get_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
 def get_events(
     jwt_token: str = "",
     nko_id: Optional[List[int]] = Query(None),
+    city: Optional[str] = None,
     favorite: Optional[bool] = None,
     category: Optional[List[str]] = Query(None),
     regex: Optional[str] = None,
@@ -251,6 +252,7 @@ def get_events(
     Args:
         jwt_token: JWT токен пользователя (может быть пустой строкой, обязателен только для favorite)
         nko_id: Фильтр по НКО (опционально, можно передать несколько раз)
+        city: Фильтр по городу (опционально)
         favorite: Фильтр по избранным (опционально, требует jwt_token)
         category: Фильтр по категориям (опционально, можно передать несколько раз)
         regex: Регулярное выражение для поиска (опционально)
@@ -262,12 +264,13 @@ def get_events(
         Список событий с их категориями
     
     Example:
-        GET /event?jwt_token=&nko_id=1&nko_id=2&category=Спорт&time_from=2024-01-01T00:00:00
+        GET /event?jwt_token=&nko_id=1&nko_id=2&city=Москва&category=Спорт&time_from=2024-01-01T00:00:00
         GET /event?jwt_token=TOKEN&favorite=true
     """
     filters = EventFilterRequest(
         jwt_token=jwt_token,
         nko_id=nko_id,
+        city=city,
         favorite=favorite,
         category=category,
         regex=regex,

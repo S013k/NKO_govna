@@ -66,13 +66,13 @@ def create_city(city_data: CityCreateRequest, db: Session) -> CityResponse:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
-def fetch_city_by_id(city_id: int, db: Session) -> CityResponse:
+def fetch_city_by_name(city_name: str, db: Session) -> CityResponse:
     """
-    Получение города по ID
+    Получение города по имени
     """
     
     try:
-        city = db.query(CityInDB).filter(CityInDB.id == city_id).first()
+        city = db.query(CityInDB).filter(CityInDB.name == city_name).first()
         
         if not city:
             raise HTTPException(status_code=404, detail="City not found")

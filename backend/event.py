@@ -9,6 +9,7 @@ from database import get_db
 from models import (
     EventInDB,
     NKOInDB,
+    CityInDB,
     EventsCategoryInDB,
     EventsCategoriesLinkInDB,
 )
@@ -19,6 +20,7 @@ class EventFilterRequest(BaseModel):
 
     jwt_token: str = ""  # Может быть пустой строкой, обязателен только для favorite
     nko_id: Optional[List[int]] = None  # Фильтр по НКО (можно несколько)
+    city: Optional[str] = None  # Фильтр по городу
     favorite: Optional[bool] = None  # Фильтр по избранным
     category: Optional[List[str]] = None
     regex: Optional[str] = None
@@ -33,6 +35,7 @@ class EventCreateRequest(BaseModel):
     name: str
     description: Optional[str] = None
     address: Optional[str] = None
+    city: str  # Название города
     picture: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -53,6 +56,7 @@ class EventResponse(BaseModel):
     name: str
     description: Optional[str]
     address: Optional[str]
+    city: Optional[str]  # Название города
     picture: Optional[str]
     latitude: Optional[float]
     longitude: Optional[float]
@@ -79,10 +83,11 @@ def fetch_events(filters: EventFilterRequest, db: Session) -> List[EventResponse
     """
     
     try:
-        # Базовый запрос с JOIN к НКО
+        # Базовый запрос с JOIN к НКО и городам
         query = (
-            db.query(EventInDB, NKOInDB.name.label("nko_name"))
+            db.query(EventInDB, NKOInDB.name.label("nko_name"), CityInDB.name.label("city_name"))
             .join(NKOInDB, EventInDB.nko_id == NKOInDB.id)
+            .join(CityInDB, EventInDB.city_id == CityInDB.id)
         )
         
         # Фильтр по НКО (можно несколько)
@@ -137,7 +142,7 @@ def fetch_events(filters: EventFilterRequest, db: Session) -> List[EventResponse
         
         # Получение категорий для каждого события
         event_list = []
-        for event, nko_name in rows:
+        for event, nko_name, city_name in rows:
             # Запрос категорий для текущего события
             categories = (
                 db.query(EventsCategoryInDB.name)
@@ -160,6 +165,7 @@ def fetch_events(filters: EventFilterRequest, db: Session) -> List[EventResponse
                 name=event.name,
                 description=event.description,
                 address=event.address,
+                city=city_name,
                 picture=event.picture,
                 latitude=latitude,
                 longitude=longitude,
@@ -196,10 +202,11 @@ def fetch_event_by_id(event_id: int, db: Session) -> EventResponse:
     """
     
     try:
-        # Запрос события с JOIN к НКО
+        # Запрос события с JOIN к НКО и городам
         result = (
-            db.query(EventInDB, NKOInDB.name.label("nko_name"))
+            db.query(EventInDB, NKOInDB.name.label("nko_name"), CityInDB.name.label("city_name"))
             .join(NKOInDB, EventInDB.nko_id == NKOInDB.id)
+            .join(CityInDB, EventInDB.city_id == CityInDB.id)
             .filter(EventInDB.id == event_id)
             .first()
         )
@@ -207,7 +214,7 @@ def fetch_event_by_id(event_id: int, db: Session) -> EventResponse:
         if not result:
             raise HTTPException(status_code=404, detail=f"Событие с ID {event_id} не найдено")
         
-        event, nko_name = result
+        event, nko_name, city_name = result
         
         # Запрос категорий для события
         categories = (
@@ -231,6 +238,7 @@ def fetch_event_by_id(event_id: int, db: Session) -> EventResponse:
             name=event.name,
             description=event.description,
             address=event.address,
+            city=city_name,
             picture=event.picture,
             latitude=latitude,
             longitude=longitude,
@@ -272,6 +280,11 @@ def create_event(event_data: EventCreateRequest, db: Session) -> EventResponse:
         nko = db.query(NKOInDB).filter(NKOInDB.id == event_data.nko_id).first()
         if not nko:
             raise HTTPException(status_code=404, detail=f"НКО с ID {event_data.nko_id} не найдено")
+            
+        # Проверяем существование города
+        city = db.query(CityInDB).filter(CityInDB.name == event_data.city).first()
+        if not city:
+            raise HTTPException(status_code=404, detail=f"Город '{event_data.city}' не найден")
         
         # Проверяем существование всех категорий
         categories = []
@@ -292,6 +305,7 @@ def create_event(event_data: EventCreateRequest, db: Session) -> EventResponse:
             name=event_data.name,
             description=event_data.description,
             address=event_data.address,
+            city_id=city.id,
             picture=event_data.picture,
             coords=coords,
             starts_at=event_data.starts_at,
@@ -323,6 +337,7 @@ def create_event(event_data: EventCreateRequest, db: Session) -> EventResponse:
             name=new_event.name,
             description=new_event.description,
             address=new_event.address,
+            city=event_data.city,
             picture=new_event.picture,
             latitude=event_data.latitude,
             longitude=event_data.longitude,
@@ -382,6 +397,7 @@ def delete_event(event_id: int, db: Session) -> dict:
         raise
     except Exception as e:
         db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 def add_event_to_favorites(user_id: int, event_id: int, db: Session) -> dict:
@@ -488,8 +504,9 @@ def get_favorite_events(user_id: int, db: Session) -> List[EventResponse]:
     try:
         # Запрос избранных мероприятий с JOIN
         query = (
-            db.query(EventInDB, NKOInDB.name.label("nko_name"))
+            db.query(EventInDB, NKOInDB.name.label("nko_name"), CityInDB.name.label("city_name"))
             .join(NKOInDB, EventInDB.nko_id == NKOInDB.id)
+            .join(CityInDB, EventInDB.city_id == CityInDB.id)
             .join(FavoriteEventsInDB, EventInDB.id == FavoriteEventsInDB.event_id)
             .filter(FavoriteEventsInDB.user_id == user_id)
             .order_by(EventInDB.created_at.desc())
@@ -499,7 +516,7 @@ def get_favorite_events(user_id: int, db: Session) -> List[EventResponse]:
         
         # Получение категорий для каждого мероприятия
         event_list = []
-        for event, nko_name in rows:
+        for event, nko_name, city_name in rows:
             # Запрос категорий для текущего мероприятия
             categories = (
                 db.query(EventsCategoryInDB.name)
@@ -522,6 +539,7 @@ def get_favorite_events(user_id: int, db: Session) -> List[EventResponse]:
                 name=event.name,
                 description=event.description,
                 address=event.address,
+                city=city_name,
                 picture=event.picture,
                 latitude=latitude,
                 longitude=longitude,
@@ -539,5 +557,4 @@ def get_favorite_events(user_id: int, db: Session) -> List[EventResponse]:
         return event_list
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
