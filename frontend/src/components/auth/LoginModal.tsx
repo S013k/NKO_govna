@@ -106,7 +106,10 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
       setFormData({ login: '', password: '' })
       setTouched({ login: false, password: false })
     } catch (err) {
-      setErrors({ general: err instanceof Error ? err.message : 'Ошибка входа' })
+      console.log('DEBUG: LoginModal caught error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Ошибка входа'
+      console.log('DEBUG: LoginModal setting error message:', errorMessage)
+      setErrors({ general: errorMessage })
     } finally {
       setIsLoading(false)
     }

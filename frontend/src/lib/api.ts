@@ -39,6 +39,16 @@ class ApiError extends Error {
   }
 }
 
+// Function to translate common error messages
+const translateErrorMessage = (message: string): string => {
+  const translations: Record<string, string> = {
+    'Incorrect username or password': 'Неверный логин или пароль',
+    'Could not validate credentials': 'Не удалось проверить учетные данные',
+    'Login already registered': 'Логин уже зарегистрирован',
+  }
+  return translations[message] || message
+}
+
 // API клиент с автоматическим обновлением токена
 class ApiClient {
   private baseURL: string
@@ -90,10 +100,21 @@ class ApiClient {
 
       try {
         const errorData = await response.json()
+        console.log('DEBUG: Backend error response:', errorData)
         errorMessage = errorData.detail || errorMessage
         detail = errorData.detail || ''
+        console.log('DEBUG: Extracted error message:', errorMessage)
+        
+        // Translate the error message
+        errorMessage = translateErrorMessage(errorMessage)
+        console.log('DEBUG: Translated error message:', errorMessage)
       } catch {
         errorMessage = response.statusText || errorMessage
+        console.log('DEBUG: Fallback error message:', errorMessage)
+        
+        // Translate the fallback error message as well
+        errorMessage = translateErrorMessage(errorMessage)
+        console.log('DEBUG: Translated fallback error message:', errorMessage)
       }
 
       throw new ApiError(errorMessage, response.status, detail)
@@ -290,4 +311,94 @@ export async function fetchCities(): Promise<CityResponse[]> {
   const endpoint = `/city${queryString ? `?${queryString}` : ''}`
   
   return apiClient.get<CityResponse[]>(endpoint)
+}
+// Event related interfaces
+export interface EventResponse {
+  id: number
+  nko_id: number
+  nko_name?: string
+  name: string
+  description?: string
+  address?: string
+  picture?: string
+  latitude?: number
+  longitude?: number
+  starts_at?: string
+  finish_at?: string
+  created_by: number
+  approved_by?: number
+  state: string
+  meta?: string
+  created_at?: string
+  categories: string[]
+}
+
+export interface EventFilters {
+  nko_id?: number[]
+  category?: string[]
+  regex?: string
+  time_from?: string
+  time_to?: string
+}
+
+// Event API methods
+export async function fetchEvents(filters?: EventFilters): Promise<EventResponse[]> {
+  const params = new URLSearchParams()
+  
+  // Получаем токен из cookies или используем пустой
+  const token = typeof window !== 'undefined' && window.localStorage
+    ? localStorage.getItem('access_token')
+    : null
+  
+  if (token) {
+    params.append('jwt_token', token)
+  } else {
+    params.append('jwt_token', '') // Пустой токен для неавторизованных пользователей
+  }
+  
+  if (filters?.nko_id && filters.nko_id.length > 0) {
+    filters.nko_id.forEach(id => params.append('nko_id', id.toString()))
+  }
+  
+  if (filters?.category && filters.category.length > 0) {
+    filters.category.forEach(cat => params.append('category', cat))
+  }
+  
+  if (filters?.regex) {
+    params.append('regex', filters.regex)
+  }
+  
+  if (filters?.time_from) {
+    params.append('time_from', filters.time_from)
+  }
+  
+  if (filters?.time_to) {
+    params.append('time_to', filters.time_to)
+  }
+  
+  const queryString = params.toString()
+  const endpoint = `/event${queryString ? `?${queryString}` : ''}`
+  
+  return apiClient.get<EventResponse[]>(endpoint)
+}
+
+export async function fetchEventById(id: number): Promise<EventResponse> {
+  // Добавляем JWT токен как в других функциях
+  const token = typeof window !== 'undefined' && window.localStorage
+    ? localStorage.getItem('access_token')
+    : null
+  
+  const params = new URLSearchParams()
+  if (token) {
+    params.append('jwt_token', token)
+  } else {
+    params.append('jwt_token', '') // Пустой токен для неавторизованных пользователей
+  }
+  
+  const queryString = params.toString()
+  const endpoint = `/event/${id}${queryString ? `?${queryString}` : ''}`
+  
+  console.log('DEBUG: fetchEventById - ID:', id, 'Endpoint:', endpoint)
+  
+  return apiClient.get<EventResponse>(endpoint)
 }

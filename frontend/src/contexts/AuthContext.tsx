@@ -70,8 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Login error:', error)
       if (error instanceof ApiError) {
+        console.log('DEBUG: ApiError message being thrown:', error.message)
         throw new Error(error.message)
       }
+      console.log('DEBUG: Generic error being thrown: Ошибка входа')
       throw new Error('Ошибка входа')
     }
   }

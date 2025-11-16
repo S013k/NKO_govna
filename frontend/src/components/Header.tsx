@@ -43,6 +43,12 @@ export function Header() {
               НКО
             </Link>
             <Link
+              href="/events"
+              className="text-secondary hover:text-primary transition-colors font-medium"
+            >
+              События
+            </Link>
+            <Link
               href="/news"
               className="text-secondary hover:text-primary transition-colors font-medium"
             >
@@ -104,15 +110,22 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-[var(--color-border)] py-4">
             <nav className="flex flex-col space-y-4">
-              <Link 
-                href="/nko" 
+              <Link
+                href="/nko"
                 className="text-[var(--color-text-primary)] hover:text-[var(--color-primary)] font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 НКО
               </Link>
-              <Link 
-                href="/news" 
+              <Link
+                href="/events"
+                className="text-[var(--color-text-primary)] hover:text-[var(--color-primary)] font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                События
+              </Link>
+              <Link
+                href="/news"
                 className="text-[var(--color-text-primary)] hover:text-[var(--color-primary)] font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
