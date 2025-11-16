@@ -530,6 +530,70 @@ paths:
           description: Ошибка базы данных
 
 
+  /news/{newsId}/favorite:
+    post:
+      tags: [Новости]
+      summary: Добавить новость в избранное
+      description: Добавление новости в список избранных для текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: newsId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID новости для добавления в избранное
+      responses:
+        '200':
+          description: Новость успешно добавлена в избранное
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Новость с ID 1 добавлена в избранное"
+        '400':
+          description: Новость уже в избранном
+        '404':
+          description: Новость не найдена
+        '401':
+          description: Пользователь не авторизован
+        '500':
+          description: Ошибка базы данных
+    delete:
+      tags: [Новости]
+      summary: Удалить новость из избранного
+      description: Удаление новости из списка избранных для текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: newsId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID новости для удаления из избранного
+      responses:
+        '200':
+          description: Новость успешно удалена из избранного
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Новость с ID 1 удалена из избранного"
+        '404':
+          description: Новость не найдена в избранном
+        '401':
+          description: Пользователь не авторизован
+        '500':
+          description: Ошибка базы данных
+
   /news:
     get:
       tags: [Публичные данные]
