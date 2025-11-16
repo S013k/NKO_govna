@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { MapPin, Phone, Mail, Globe, Users, Calendar, ArrowLeft, Heart, Share2, Star } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { fetchNKOById, NKOResponse } from '@/lib/api'
+import { fetchNKOById, NKOResponse, addNKOToFavorites, removeNKOFromFavorites, checkIfNKOIsFavorite } from '@/lib/api'
 import { notFound } from 'next/navigation'
 import { NKOLogo } from '@/components/NKOLogo'
 import { useState, useEffect } from 'react'
@@ -24,6 +24,7 @@ export default function NKODetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [isLoadingFavorite, setIsLoadingFavorite] = useState(false)
   
   console.log('NKODetailPage - slug:', slug)
   
@@ -43,6 +44,13 @@ export default function NKODetailPage() {
         const nkoData = await fetchNKOById(id)
         console.log('NKODetailPage - fetched NKO:', nkoData)
         setNko(nkoData)
+        
+        // Проверяем статус избранного после загрузки НКО
+        if (user) {
+          console.log('NKODetailPage - checking favorite status for user:', user.id)
+          const favoriteStatus = await checkIfNKOIsFavorite(id)
+          setIsFavorite(favoriteStatus)
+        }
       } catch (err) {
         console.error('Error fetching NKO:', err)
         setError('Не удалось загрузить данные организации')
@@ -54,7 +62,25 @@ export default function NKODetailPage() {
     if (slug) {
       loadNKO()
     }
-  }, [slug])
+  }, [slug, user])
+
+  // Отдельный useEffect для проверки статуса избранного при изменении пользователя
+  useEffect(() => {
+    if (nko && user) {
+      console.log('NKODetailPage - user changed, checking favorite status')
+      checkIfNKOIsFavorite(nko.id)
+        .then(favoriteStatus => {
+          setIsFavorite(favoriteStatus)
+        })
+        .catch(err => {
+          console.error('Error checking favorite status:', err)
+          setIsFavorite(false)
+        })
+    } else if (!user) {
+      // Сбрасываем состояние если пользователь вышел
+      setIsFavorite(false)
+    }
+  }, [user, nko])
 
   if (loading) {
     return (
@@ -164,19 +190,43 @@ export default function NKODetailPage() {
                   size="lg"
                   variant="outline"
                   className="border-white text-white bg-transparent hover:bg-white hover:text-[var(--color-primary)]"
-                  onClick={() => {
-                    console.log('Button clicked - user:', user)
+                  onClick={async () => {
+                    console.log('DEBUG: Favorites button clicked - user:', user)
+                    console.log('DEBUG: Current NKO ID:', nko?.id)
+                    console.log('DEBUG: Current favorite state:', isFavorite)
+                    
                     if (!user) {
-                      console.log('Showing auth modal')
+                      console.log('DEBUG: User not authenticated, showing auth modal')
                       setShowAuthModal(true)
                     } else {
-                      console.log('Toggling favorite:', !isFavorite)
-                      setIsFavorite(!isFavorite)
+                      console.log('DEBUG: User authenticated, attempting to toggle favorite')
+                      setIsLoadingFavorite(true)
+                      
+                      try {
+                        if (isFavorite) {
+                          console.log('DEBUG: Removing from favorites')
+                          await removeNKOFromFavorites(nko.id)
+                          setIsFavorite(false)
+                          console.log('DEBUG: Successfully removed from favorites')
+                        } else {
+                          console.log('DEBUG: Adding to favorites')
+                          await addNKOToFavorites(nko.id)
+                          setIsFavorite(true)
+                          console.log('DEBUG: Successfully added to favorites')
+                        }
+                      } catch (error) {
+                        console.error('DEBUG: Error toggling favorite:', error)
+                        // Возвращаем предыдущее состояние при ошибке
+                        // setIsFavorite(isFavorite) // уже установлено правильно
+                      } finally {
+                        setIsLoadingFavorite(false)
+                      }
                     }
                   }}
+                  disabled={isLoadingFavorite}
                 >
                   <Star className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
-                  {isFavorite ? 'В избранном' : 'В избранное'}
+                  {isLoadingFavorite ? 'Загрузка...' : (isFavorite ? 'В избранном' : 'В избранное')}
                 </Button>
                 <Button size="lg" variant="outline" className="border-white text-white bg-transparent hover:bg-white hover:text-[var(--color-primary)]">
                   <Share2 className="h-4 w-4 mr-2" />
@@ -188,30 +238,23 @@ export default function NKODetailPage() {
               {showAuthModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                   <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-                      Требуется авторизация
-                    </h3>
-                    <p className="text-[var(--color-text-secondary)] mb-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex-1"></div>
+                      <h3 className="text-lg font-semibold text-gray-900 text-center">Требуется авторизация</h3>
+                      <div className="flex-1 flex justify-end">
+                        <button
+                          onClick={() => setShowAuthModal(false)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-[var(--color-text-secondary)] mb-4 text-center">
                       Чтобы добавлять организации в избранное, пожалуйста, войдите в свой аккаунт.
                     </p>
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={() => setShowAuthModal(false)}
-                        variant="outline"
-                        className="flex-1"
-                      >
-                        Отмена
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setShowAuthModal(false)
-                          // Здесь можно добавить логику перехода на страницу входа
-                        }}
-                        className="flex-1 btn-primary"
-                      >
-                        Войти
-                      </Button>
-                    </div>
                   </div>
                 </div>
               )}

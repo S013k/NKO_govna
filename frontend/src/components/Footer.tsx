@@ -10,7 +10,7 @@ export function Footer() {
   return (
     <footer className="bg-[var(--color-bg-secondary)] border-t border-[var(--color-border)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* О проекте */}
           <div className="lg:col-span-1">
             <div className="mb-4">
@@ -92,55 +92,6 @@ export function Footer() {
                   className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors text-sm"
                 >
                   Календарь событий
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Категории НКО */}
-          <div>
-            <h3 className="font-bold text-[var(--color-text-primary)] text-lg mb-4">
-              Категории НКО
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link 
-                  href="/nko?category=Социальная помощь" 
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors text-sm"
-                >
-                  Социальная помощь
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/nko?category=Экология" 
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors text-sm"
-                >
-                  Экология
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/nko?category=Образование" 
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors text-sm"
-                >
-                  Образование
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/nko?category=Спорт" 
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors text-sm"
-                >
-                  Спорт
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/nko?category=Культура" 
-                  className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors text-sm"
-                >
-                  Культура
                 </Link>
               </li>
             </ul>

@@ -238,16 +238,15 @@ export interface NKOFilters {
   city?: string
   category?: string[]
   regex?: string
+  favorite?: boolean
 }
 
 // NKO API methods
 export async function fetchNKO(filters?: NKOFilters): Promise<NKOResponse[]> {
   const params = new URLSearchParams()
   
-  // Получаем токен из cookies или используем пустой
-  const token = typeof window !== 'undefined' && window.localStorage
-    ? localStorage.getItem('access_token')
-    : null
+  // Получаем токен из cookies (как в других частях приложения)
+  const token = cookies.getAccessToken()
   
   if (token) {
     params.append('jwt_token', token)
@@ -267,17 +266,22 @@ export async function fetchNKO(filters?: NKOFilters): Promise<NKOResponse[]> {
     params.append('regex', filters.regex)
   }
   
+  if (filters?.favorite !== undefined) {
+    params.append('favorite', filters.favorite.toString())
+    console.log('DEBUG: fetchNKO - Adding favorite filter:', filters.favorite)
+  }
+  
   const queryString = params.toString()
   const endpoint = `/nko${queryString ? `?${queryString}` : ''}`
+  
+  console.log('DEBUG: fetchNKO - Endpoint:', endpoint)
   
   return apiClient.get<NKOResponse[]>(endpoint)
 }
 
 export async function fetchNKOById(id: number): Promise<NKOResponse> {
   // Добавляем JWT токен как в других функциях
-  const token = typeof window !== 'undefined' && window.localStorage
-    ? localStorage.getItem('access_token')
-    : null
+  const token = cookies.getAccessToken()
   
   const params = new URLSearchParams()
   if (token) {
@@ -295,10 +299,8 @@ export async function fetchNKOById(id: number): Promise<NKOResponse> {
 }
 
 export async function fetchCities(): Promise<CityResponse[]> {
-  // Получаем токен из cookies или используем пустой
-  const token = typeof window !== 'undefined' && window.localStorage
-    ? localStorage.getItem('access_token')
-    : null
+  // Получаем токен из cookies
+  const token = cookies.getAccessToken()
   
   const params = new URLSearchParams()
   if (token) {
@@ -345,10 +347,8 @@ export interface EventFilters {
 export async function fetchEvents(filters?: EventFilters): Promise<EventResponse[]> {
   const params = new URLSearchParams()
   
-  // Получаем токен из cookies или используем пустой
-  const token = typeof window !== 'undefined' && window.localStorage
-    ? localStorage.getItem('access_token')
-    : null
+  // Получаем токен из cookies
+  const token = cookies.getAccessToken()
   
   if (token) {
     params.append('jwt_token', token)
@@ -384,9 +384,7 @@ export async function fetchEvents(filters?: EventFilters): Promise<EventResponse
 
 export async function fetchEventById(id: number): Promise<EventResponse> {
   // Добавляем JWT токен как в других функциях
-  const token = typeof window !== 'undefined' && window.localStorage
-    ? localStorage.getItem('access_token')
-    : null
+  const token = cookies.getAccessToken()
   
   const params = new URLSearchParams()
   if (token) {
@@ -401,4 +399,32 @@ export async function fetchEventById(id: number): Promise<EventResponse> {
   console.log('DEBUG: fetchEventById - ID:', id, 'Endpoint:', endpoint)
   
   return apiClient.get<EventResponse>(endpoint)
+}
+
+// Favorites API functions
+export async function addNKOToFavorites(nkoId: number): Promise<{ message: string }> {
+  console.log('DEBUG: addNKOToFavorites - NKO ID:', nkoId)
+  const endpoint = `/nko/${nkoId}/favorite`
+  return apiClient.post<{ message: string }>(endpoint, {})
+}
+
+export async function removeNKOFromFavorites(nkoId: number): Promise<{ message: string }> {
+  console.log('DEBUG: removeNKOFromFavorites - NKO ID:', nkoId)
+  const endpoint = `/nko/${nkoId}/favorite`
+  return apiClient.delete<{ message: string }>(endpoint)
+}
+
+export async function checkIfNKOIsFavorite(nkoId: number): Promise<boolean> {
+  console.log('DEBUG: checkIfNKOIsFavorite - NKO ID:', nkoId)
+  try {
+    // Получаем избранные НКО пользователя и проверяем наличие текущей
+    const favorites = await fetchNKO({ favorite: true })
+    const isFavorite = favorites.some(nko => nko.id === nkoId)
+    console.log('DEBUG: checkIfNKOIsFavorite - result:', isFavorite)
+    return isFavorite
+  } catch (error) {
+    console.log('DEBUG: checkIfNKOIsFavorite - error:', error)
+    // Если ошибка (например, пользователь не авторизован), считаем что не в избранном
+    return false
+  }
 }

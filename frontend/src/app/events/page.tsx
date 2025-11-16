@@ -7,17 +7,19 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Search, Filter, Calendar } from 'lucide-react'
-import { fetchEvents, fetchCities, EventResponse, CityResponse, EventFilters } from '@/lib/api'
+import { fetchEvents, fetchCities, fetchNKO, EventResponse, CityResponse, EventFilters, NKOResponse } from '@/lib/api'
 import { useState, useMemo, useEffect } from 'react'
 
 export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedCity, setSelectedCity] = useState<string>('all')
+  const [selectedNKO, setSelectedNKO] = useState<string>('all')
   const [selectedDateFrom, setSelectedDateFrom] = useState<string>('')
   const [selectedDateTo, setSelectedDateTo] = useState<string>('')
   const [eventsData, setEventsData] = useState<EventResponse[]>([])
   const [cities, setCities] = useState<CityResponse[]>([])
+  const [nkoList, setNkoList] = useState<NKOResponse[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,10 +31,11 @@ export default function EventsPage() {
         setLoading(true)
         setError(null)
         
-        // Параллельно загружаем события и города
-        const [eventsResponse, citiesResponse] = await Promise.all([
+        // Параллельно загружаем события, города и НКО
+        const [eventsResponse, citiesResponse, nkoResponse] = await Promise.all([
           fetchEvents(),
-          fetchCities()
+          fetchCities(),
+          fetchNKO()
         ])
         
         // Сортируем события по дате (ближайшие первые)
@@ -44,6 +47,7 @@ export default function EventsPage() {
         
         setEventsData(sortedEvents)
         setCities(citiesResponse)
+        setNkoList(nkoResponse)
         
         // Извлекаем уникальные категории из событий
         const uniqueCategories = Array.from(
@@ -71,6 +75,9 @@ export default function EventsPage() {
       // Фильтр по городу (через НКО)
       const matchesCity = selectedCity === 'all' || (event.nko_name && event.nko_name.includes(selectedCity))
       
+      // Фильтр по НКО
+      const matchesNKO = selectedNKO === 'all' || event.nko_id.toString() === selectedNKO
+      
       // Фильтр по дате
       let matchesDateFrom = true
       let matchesDateTo = true
@@ -83,9 +90,9 @@ export default function EventsPage() {
         matchesDateTo = new Date(event.starts_at) <= new Date(selectedDateTo + 'T23:59:59')
       }
       
-      return matchesSearch && matchesCategory && matchesCity && matchesDateFrom && matchesDateTo
+      return matchesSearch && matchesCategory && matchesCity && matchesNKO && matchesDateFrom && matchesDateTo
     })
-  }, [eventsData, searchTerm, selectedCategory, selectedCity, selectedDateFrom, selectedDateTo])
+  }, [eventsData, searchTerm, selectedCategory, selectedCity, selectedNKO, selectedDateFrom, selectedDateTo])
 
   return (
     <div className="min-h-screen bg-white">
@@ -153,26 +160,51 @@ export default function EventsPage() {
                 </Select>
               </div>
               
-              {/* Фильтр по дате от */}
+              {/* Фильтр по НКО */}
               <div>
-                <Input
-                  type="date"
-                  placeholder="Дата от"
-                  value={selectedDateFrom}
-                  onChange={(e) => setSelectedDateFrom(e.target.value)}
-                  className="border-[var(--color-border)] focus:ring-[var(--color-primary)]"
-                />
+                <Select value={selectedNKO} onValueChange={setSelectedNKO}>
+                  <SelectTrigger className="border-[var(--color-border)] focus:ring-[var(--color-primary)]">
+                    <SelectValue placeholder="Все НКО" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все НКО</SelectItem>
+                    {nkoList.map((nko) => (
+                      <SelectItem key={nko.id} value={nko.id.toString()}>
+                        {nko.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
-              {/* Фильтр по дате до */}
-              <div>
-                <Input
-                  type="date"
-                  placeholder="Дата до"
-                  value={selectedDateTo}
-                  onChange={(e) => setSelectedDateTo(e.target.value)}
-                  className="border-[var(--color-border)] focus:ring-[var(--color-primary)]"
-                />
+              {/* Фильтр по датам */}
+              <div className="md:col-span-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[var(--color-text-secondary)]">Период событий</label>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Input
+                        type="date"
+                        placeholder="От"
+                        value={selectedDateFrom}
+                        onChange={(e) => setSelectedDateFrom(e.target.value)}
+                        className="border-[var(--color-border)] focus:ring-[var(--color-primary)]"
+                      />
+                      </div>
+                    <div className="flex items-center text-[var(--color-text-secondary)]">
+                      —
+                    </div>
+                    <div className="flex-1">
+                      <Input
+                        type="date"
+                        placeholder="До"
+                        value={selectedDateTo}
+                        onChange={(e) => setSelectedDateTo(e.target.value)}
+                        className="border-[var(--color-border)] focus:ring-[var(--color-primary)]"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -184,6 +216,7 @@ export default function EventsPage() {
                   setSearchTerm('')
                   setSelectedCategory('all')
                   setSelectedCity('all')
+                  setSelectedNKO('all')
                   setSelectedDateFrom('')
                   setSelectedDateTo('')
                 }}
@@ -266,6 +299,7 @@ export default function EventsPage() {
                       setSearchTerm('')
                       setSelectedCategory('all')
                       setSelectedCity('all')
+                      setSelectedNKO('all')
                       setSelectedDateFrom('')
                       setSelectedDateTo('')
                     }}
