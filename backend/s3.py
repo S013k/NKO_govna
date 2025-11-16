@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from io import BytesIO
 from typing import List, Optional
+from hashlib import md5
 
 from fastapi import APIRouter, File, HTTPException, Response, UploadFile
 from fastapi.responses import StreamingResponse
@@ -92,6 +93,7 @@ class S3Client:
         try:
             # Читаем файл
             file_content = await file.read()
+            filename = md5(file_content).hexdigest()
             file_size = len(file_content)
 
             # Возвращаем указатель в начало для последующей загрузки
@@ -100,38 +102,38 @@ class S3Client:
             # Загружаем в MinIO
             self.client.put_object(
                 bucket_name=bucket,
-                object_name=file.filename,
+                object_name=filename,
                 data=BytesIO(file_content),
                 length=file_size,
                 content_type=file.content_type,
             )
 
             # Формируем URL для доступа
-            file_url = f"{settings.s3_base_url}/{bucket}/{file.filename}"
+            file_url = f"{settings.s3_base_url}/{bucket}/{filename}"
 
             # Логируем операцию
             self._log_operation(
                 "UPLOAD",
                 bucket,
-                file.filename,
+                filename,
                 f"Size: {file_size}, ContentType: {file.content_type}",
             )
 
             return UploadResponse(
                 url=file_url,
                 bucket=bucket,
-                filename=file.filename,
+                filename=filename,
                 size=file_size,
                 content_type=file.content_type,
             )
 
         except S3Error as e:
             logger.error(
-                f"Error uploading file {file.filename} to bucket {bucket}: {e}"
+                f"Error uploading file {filename} to bucket {bucket}: {e}"
             )
             raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
         except Exception as e:
-            logger.error(f"Unexpected error uploading file {file.filename}: {e}")
+            logger.error(f"Unexpected error uploading file {filename}: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
     def get_file(self, bucket: str, filename: str) -> StreamingResponse:
