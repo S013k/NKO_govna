@@ -46,6 +46,24 @@ services:
     networks:
       - cora-network
 
+  cora:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - cora-network
+
   quokka:
     build:
       context: ..
@@ -66,6 +84,7 @@ services:
     networks:
       - cora-network
 
+<<<<<<< HEAD
   cora:
     build:
       context: ..
@@ -87,6 +106,8 @@ services:
     networks:
       - cora-network
 
+=======
+>>>>>>> b75df93 (fix4)
   nginx:
     image: nginx:latest
     ports:
