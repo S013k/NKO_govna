@@ -153,7 +153,7 @@ sync_all_buckets() {
                         -F "file=@$FILE_PATH;filename=$OBJECT_NAME" \
                         "$UPLOAD_URL")
                         
-                    if echo "$upload_response" | grep -q "HTTP_CODE:201"; then
+                    if echo "$upload_response" | grep -q "HTTP_CODE:200"; then
                         ((uploaded_count++))
                     else
                         error "    Ошибка загрузки '$OBJECT_NAME'. Ответ сервера:"

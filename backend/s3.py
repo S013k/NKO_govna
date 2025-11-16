@@ -93,7 +93,10 @@ class S3Client:
         try:
             # Читаем файл
             file_content = await file.read()
-            filename = md5(file_content).hexdigest()
+            ext = "ukn"
+            if file.filename and "." in file.filename:
+                ext = file.filename.rsplit(".", 1)[1]
+            filename = f"{md5(file_content).hexdigest()}.{ext}"
             file_size = len(file_content)
 
             # Возвращаем указатель в начало для последующей загрузки
