@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добрые дела Росатома - Презентация проекта</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #025EA1;
+            --secondary-blue: #6CACE4;
+            --text-color: #333333;
+            --bg-light: #F8F9FA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .slide-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(2, 94, 161, 0.15);
+            padding: 3rem;
+            max-width: 1200px;
+            width: 100%;
+            margin: auto;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .title {
+            color: var(--primary-blue);
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: var(--secondary-blue);
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .content {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--text-color);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+            border-left: 4px solid var(--primary-blue);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .list-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .icon {
+            display: inline-block;
+            color: var(--secondary-blue);
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #014a7d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(2, 94, 161, 0.3);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: var(--primary-blue);
+            transform: scale(1.3);
+        }
+
+        .dot:hover {
+            background: var(--secondary-blue);
+        }
+
+        .slide-number {
+            color: var(--primary-blue);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .architecture-diagram {
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .arch-box {
+            background: white;
+            border: 2px solid var(--secondary-blue);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.75rem auto;
+            max-width: 400px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .arrow {
+            color: var(--secondary-blue);
+            font-size: 1.5rem;
+            margin: 0.25rem 0;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--secondary-blue);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            margin: 0.25rem;
+            font-weight: 500;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(2, 94, 161, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.75rem;
+            }
+            
+            .subtitle {
+                font-size: 1.125rem;
+            }
+            
+            .content {
+                font-size: 1rem;
+            }
+            
+            .slide-content {
+                padding: 1.5rem;
+            }
+            
+            .navigation {
+                bottom: 1rem;
+                padding: 0.75rem 1rem;
+                gap: 1rem;
+            }
+            
+            .nav-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide active" data-slide="1">
+        <div class="slide-content">
+            <div class="text-center">
+                <h1 class="title" style="font-size: 3rem; margin-bottom: 1.5rem;">Добрые дела Росатома</h1>
+                <p class="subtitle" style="font-size: 1.75rem;">Единый онлайн-портал для НКО, координаторов и волонтёров</p>
+                <div class="highlight-box" style="margin-top: 3rem;">
+                    <p class="content" style="font-size: 1.25rem;">
+                        Проект разработан в рамках хакатона<br>
+                        для создания прототипа многостраничного портала,<br>
+                        который объединяет всю информацию о социальных инициативах<br>
+                        в городах присутствия ГК Росатом
+                    </p>
+                </div>
+                <p style="margin-top: 3rem; color: var(--secondary-blue); font-size: 1.125rem; font-weight: 600;">
+                    Станьте частью добрых дел в вашем городе! 🌟
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Project Overview -->
+    <div class="slide" data-slide="2">
+        <div class="slide-content">
+            <h1 class="title">Обзор проекта</h1>
+            <div class="content">
+                <div class="list-item">
+                    <span class="icon">✓</span>
+                    <strong>Централизация данных</strong> об НКО, событиях и ресурсах по городам присутствия Росатома
+                </div>
+                <div class="list-item">
+                    <span class="icon">✓</span>
+                    <strong>Контекстная фильтрация</strong> по городам с динамическим изменением контента
+                </div>
+                <div class="list-item">
+                    <span class="icon">✓</span>
+                    <strong>Управление контентом</strong> через интерфейс администратора с функциями модерации
+                </div>
+                <div class="list-item">
+                    <span class="icon">✓</span>
+                    <strong>Поддержка медиа</strong> (видео, изображения, PDF) с корректным отображением
+                </div>
+                <div class="list-item">
+                    <span class="icon">✓</span>
+                    <strong>Личные кабинеты</strong> пользователей с возможностью создания страниц НКО
+                </div>
+                <div class="list-item">
+                    <span class="icon">✓</span>
+                    <strong>Система избранного</strong> для сохранения новостей, событий и материалов
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Architecture -->
+    <div class="slide" data-slide="3">
+        <div class="slide-content">
+            <h1 class="title">Архитектура системы</h1>
+            <div class="architecture-diagram">
+                <div class="arch-box">Frontend (Next.js 16 + TypeScript)</div>
+                <div class="arrow">↓</div>
+                <div class="arch-box">API Gateway (Nginx)</div>
+                <div class="arrow">↓</div>
+                <div class="arch-box">Backend API (FastAPI + Python)</div>
+                <div class="arrow" style="display: flex; justify-content: center; gap: 2rem;">
+                    <span>↙</span>
+                    <span>↓</span>
+                    <span>↘</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                    <div class="arch-box" style="max-width: 250px;">PostgreSQL Database</div>
+                    <div class="arch-box" style="max-width: 250px;">MinIO S3 Storage</div>
+                    <div class="arch-box" style="max-width: 250px;">MCP Server</div>
+                </div>
+            </div>
+            <p class="content text-center" style="margin-top: 2rem; font-style: italic;">
+                Микросервисная архитектура обеспечивает масштабируемость и независимое развёртывание компонентов
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 4: Frontend -->
+    <div class="slide" data-slide="4">
+        <div class="slide-content">
+            <h1 class="title">Фронтенд: Next.js 16</h1>
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.25rem; font-weight: 600;">Framework &amp; Language</h3>
+                    <p class="content">
+                        <span class="badge">Next.js 16</span>
+                        <span class="badge">App Router</span>
+                        <span class="badge">TypeScript</span>
+                    </p>
+                    <p style="margin-top: 1rem; color: var(--text-color);">Типобезопасность и современный подход к разработке</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.25rem; font-weight: 600;">Styling &amp; UI</h3>
+                    <p class="content">
+                        <span class="badge">Tailwind CSS</span>
+                        <span class="badge">CSS Variables</span>
+                        <span class="badge">shadcn/ui</span>
+                    </p>
+                    <p style="margin-top: 1rem; color: var(--text-color);">Соответствие брендбуку Росатома</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.25rem; font-weight: 600;">Typography</h3>
+                    <p class="content">
+                        <span class="badge">Rosatom Light</span>
+                        <span class="badge">Regular</span>
+                        <span class="badge">Bold</span>
+                    </p>
+                    <p style="margin-top: 1rem; color: var(--text-color);">Корпоративные шрифты для единого стиля</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.25rem; font-weight: 600;">Architecture</h3>
+                    <p class="content">
+                        <span class="badge">React Context</span>
+                        <span class="badge">Mobile-First</span>
+                        <span class="badge">SSR/SSG</span>
+                    </p>
+                    <p style="margin-top: 1rem; color: var(--text-color);">Оптимизация производительности</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Backend -->
+    <div class="slide" data-slide="5">
+        <div class="slide-content">
+            <h1 class="title">Бэкенд: FastAPI + PostgreSQL</h1>
+            <div class="highlight-box">
+                <div class="content">
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: var(--primary-blue);">Runtime &amp; Framework:</strong><br>
+                        Python 3.11+ | FastAPI с автоматической документацией Swagger/ReDoc
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: var(--primary-blue);">Database:</strong><br>
+                        PostgreSQL + SQLAlchemy ORM для работы с данными
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: var(--primary-blue);">Server:</strong><br>
+                        Uvicorn ASGI сервер для асинхронной обработки запросов
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: var(--primary-blue);">API Endpoints:</strong><br>
+                        RESTful архитектура с полной документацией и валидацией
+                    </div>
+                    <div>
+                        <strong style="color: var(--primary-blue);">Модули:</strong><br>
+                        НКО | События | Новости | Города | Файлы | Аутентификация
+                    </div>
+                </div>
+            </div>
+            <p class="content text-center" style="margin-top: 2rem; font-weight: 600; color: var(--secondary-blue);">
+                Масштабируемость через асинхронную обработку и модульную архитектуру
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 6: Security -->
+    <div class="slide" data-slide="6">
+        <div class="slide-content">
+            <h1 class="title">Безопасность: JWT &amp; Cryptography</h1>
+            <div class="grid-2">
+                <div class="card" style="border-left: 4px solid var(--primary-blue);">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.5rem;">🔐 JWT Аутентификация</h3>
+                    <div class="content">
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong>Access Tokens</strong><br>
+                            Ограниченное время жизни для безопасности сессий
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong>Refresh Tokens</strong><br>
+                            Безопасное продление авторизации без повторного входа
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--secondary-blue);">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.5rem;">🔒 Защита паролей</h3>
+                    <div class="content">
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong>Salted Hash</strong><br>
+                            Уникальная соль для каждого пользователя
+                        </div>
+                        <div>
+                            <strong>Per-User Salt</strong><br>
+                            Дополнительный уровень защиты от rainbow tables
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 2rem; text-align: center;">
+                <p class="content" style="font-weight: 600; color: var(--primary-blue);">
+                    Высокоуровневая безопасность соответствует современным стандартам защиты данных
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Storage -->
+    <div class="slide" data-slide="7">
+        <div class="slide-content">
+            <h1 class="title">Хранилище файлов: MinIO S3</h1>
+            <p class="subtitle" style="font-size: 1.125rem; margin-bottom: 2rem;">6 типов специализированных бакетов для разных категорий файлов</p>
+            <div class="grid-2" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="card">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">👤 userpic</h4>
+                    <p style="color: var(--text-color);">Аватары пользователей</p>
+                </div>
+                <div class="card">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">📄 docs</h4>
+                    <p style="color: var(--text-color);">Документы и PDF файлы</p>
+                </div>
+                <div class="card">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">🎥 videos</h4>
+                    <p style="color: var(--text-color);">Видеоматериалы</p>
+                </div>
+                <div class="card">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">🏢 nko-logo</h4>
+                    <p style="color: var(--text-color);">Логотипы организаций</p>
+                </div>
+                <div class="card">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">📸 event-pics</h4>
+                    <p style="color: var(--text-color);">Фотографии мероприятий</p>
+                </div>
+                <div class="card">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">🖼️ news-pics</h4>
+                    <p style="color: var(--text-color);">Изображения новостей</p>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 2rem;">
+                <p class="content" style="text-align: center;">
+                    <strong>Преимущества:</strong> масштабируемость, надёжность хранения, простота интеграции, S3-совместимый API
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Modularity -->
+    <div class="slide" data-slide="8">
+        <div class="slide-content">
+            <h1 class="title">Модульность &amp; Микросервисы</h1>
+            <p class="subtitle" style="font-size: 1.125rem;">Разделение ответственности для независимого масштабирования</p>
+            <div class="content">
+                <div class="card" style="margin-bottom: 1rem;">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">Frontend Service</h4>
+                    <p>Автономное Next.js приложение с собственной логикой рендеринга и состояния</p>
+                </div>
+                <div class="card" style="margin-bottom: 1rem;">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">Backend API</h4>
+                    <p>Основная бизнес-логика, обработка данных, валидация и авторизация</p>
+                </div>
+                <div class="card" style="margin-bottom: 1rem;">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">MCP Server</h4>
+                    <p>Интеграции с внешними системами (календари, соцсети, CRM)</p>
+                </div>
+                <div class="card" style="margin-bottom: 1rem;">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">MinIO Storage</h4>
+                    <p>Отдельный сервис для хранения и обработки файлов</p>
+                </div>
+                <div class="card">
+                    <h4 style="color: var(--primary-blue); font-weight: 600; margin-bottom: 0.5rem;">PostgreSQL</h4>
+                    <p>Централизованная база данных с возможностью репликации</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: DevOps -->
+    <div class="slide" data-slide="9">
+        <div class="slide-content">
+            <h1 class="title">DevOps: Docker &amp; CI/CD</h1>
+            <div class="grid-2">
+                <div class="card" style="border-left: 4px solid var(--primary-blue);">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.25rem;">🐳 Docker</h3>
+                    <div class="content">
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong>Docker Compose</strong><br>
+                            Простое развёртывание для локальной разработки
+                        </div>
+                        <div>
+                            <strong>Health Checks</strong><br>
+                            Автоматический мониторинг состояния сервисов
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--secondary-blue);">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.25rem;">🔄 CI/CD (GitHub Actions)</h3>
+                    <div class="content">
+                        <div style="margin-bottom: 0.75rem;">
+                            <strong>Сборка образов</strong><br>
+                            Автоматическое создание Docker images
+                        </div>
+                        <div>
+                            <strong>Deployment</strong><br>
+                            Развёртывание в production окружение
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 1.5rem;">
+                <h3 style="color: var(--primary-blue); margin-bottom: 1rem; font-size: 1.25rem;">📋 Code Review Process</h3>
+                <div class="content">
+                    <p style="margin-bottom: 0.5rem;">✓ Pull Request процесс с обязательными статусными проверками</p>
+                    <p style="margin-bottom: 0.5rem;">✓ Требование одобрения от ревьюеров перед merge</p>
+                    <p>✓ Автоматическая проверка стандартов кодирования и безопасности</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Results -->
+    <div class="slide" data-slide="10">
+        <div class="slide-content">
+            <h1 class="title" style="text-align: center;">Результаты &amp; Достижения</h1>
+            <div class="content" style="margin-top: 2rem;">
+                <div class="card" style="margin-bottom: 1rem; background: linear-gradient(135deg, #e6f2ff 0%, #ffffff 100%);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 2rem;">✅</span>
+                        <div>
+                            <strong style="color: var(--primary-blue);">Полнофункциональный прототип</strong><br>
+                            Работающий портал со всеми основными разделами
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 1rem; background: linear-gradient(135deg, #e6f2ff 0%, #ffffff 100%);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 2rem;">✅</span>
+                        <div>
+                            <strong style="color: var(--primary-blue);">Высокоуровневая безопасность</strong><br>
+                            JWT аутентификация + Salted Hash для паролей
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 1rem; background: linear-gradient(135deg, #e6f2ff 0%, #ffffff 100%);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 2rem;">✅</span>
+                        <div>
+                            <strong style="color: var(--primary-blue);">Масштабируемая архитектура</strong><br>
+                            Микросервисный подход с разделением ответственности
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 1rem; background: linear-gradient(135deg, #e6f2ff 0%, #ffffff 100%);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 2rem;">✅</span>
+                        <div>
+                            <strong style="color: var(--primary-blue);">Контейнеризация</strong><br>
+                            Docker для простого развёртывания в любой среде
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 1rem; background: linear-gradient(135deg, #e6f2ff 0%, #ffffff 100%);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 2rem;">✅</span>
+                        <div>
+                            <strong style="color: var(--primary-blue);">Автоматизированный CI/CD</strong><br>
+                            GitHub Actions pipeline для непрерывной интеграции
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 1rem; background: linear-gradient(135deg, #e6f2ff 0%, #ffffff 100%);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 2rem;">✅</span>
+                        <div>
+                            <strong style="color: var(--primary-blue);">Дизайн по брендбуку</strong><br>
+                            Адаптивный интерфейс, соответствующий стилю Росатома
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #e6f2ff 0%, #ffffff 100%);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 2rem;">✅</span>
+                        <div>
+                            <strong style="color: var(--primary-blue);">Готовность к расширению</strong><br>
+                            Модульная структура для добавления нового функционала
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 2rem; text-align: center; background: linear-gradient(135deg, #025EA1 0%, #6CACE4 100%);">
+                <p style="color: white; font-size: 1.25rem; font-weight: 600;">
+                    🎯 Проект соответствует всем критериям оценки хакатона
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Предыдущий</button>
+        <div class="dots" id="dotsContainer"></div>
+        <span class="slide-number" id="slideNumber">1 / 10</span>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Следующий →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        // Initialize dots
+        function initDots() {
+            const dotsContainer = document.getElementById('dotsContainer');
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i === 1) dot.classList.add('active');
+                dot.onclick = () => goToSlide(i);
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        // Show specific slide
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+            else currentSlide = n;
+
+            // Hide all slides
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+
+            // Remove active class from all dots
+            dots.forEach(dot => {
+                dot.classList.remove('active');
+            });
+
+            // Show current slide
+            slides[currentSlide - 1].classList.add('active');
+            dots[currentSlide - 1].classList.add('active');
+
+            // Update slide number
+            document.getElementById('slideNumber').textContent = `${currentSlide} / ${totalSlides}`;
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        // Change slide by offset
+        function changeSlide(offset) {
+            showSlide(currentSlide + offset);
+        }
+
+        // Go to specific slide
+        function goToSlide(n) {
+            showSlide(n);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Initialize
+        initDots();
+        showSlide(1);
+    </script>
+</body>
+</html>
